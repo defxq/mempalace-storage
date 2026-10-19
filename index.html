@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Blitz Command Ledger</title>
+    <style>
+        /* Clean Industrial Developer Spec Color Palette */
+        :root { 
+            --bg: #0d1117;          /* GitHub Dark Baseline */
+            --surface: #161b22;     /* Card/Menu Gray */
+            --border: #30363d;      /* Flat Muted Borders */
+            --text-main: #c9d1d9;   /* Soft High-Contrast Text */
+            --text-link: #58a6ff;   /* Spec Link Cyan Blue */
+            --accent-green: #34d399;/* Parameter Target Green */
+            --accent-pink: #f43f5e; /* Value Placeholder Red */
+            --code-bg: #010409;     /* Deep Terminal Fill */
+        }
+        
+        body { 
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+            margin: 0; padding: 0; 
+            background: var(--bg);
+            color: var(--text-main); 
+            font-size: 13px; 
+            
+            /* DYNAMIC VIEWPORT FIX: Locks layout dynamically with or without mobile browser URL bar toggles */
+            height: 100vh;
+            height: 100dvh; 
+            
+            display: flex;
+            flex-direction: column; 
+            overflow: hidden;
+            
+            /* Handles modern rounded smartphone notch display frames */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Fixed Non-Overlapping Layout Header System */
+        header { 
+            background: var(--surface);
+            border-bottom: 1px solid var(--border); 
+            flex-shrink: 0; 
+        }
+        .top-row { 
+            display: flex; flex-direction: column; gap: 10px; padding: 12px; 
+        }
+        @media (min-width: 640px) {
+            .top-row { flex-direction: row; align-items: center; justify-content: space-between; padding: 12px 16px; }
+        }
+        .logo { font-weight: 700; color: #fff; letter-spacing: -0.2px; font-size: 13px; text-transform: uppercase; }
+        
+        #search { 
+            background: var(--code-bg); border: 1px solid var(--border); 
+            color: #fff; padding: 6px 12px; width: 100%; border-radius: 4px; font-family: inherit; box-sizing: border-box;
+        }
+        @media (min-width: 640px) { #search { width: 300px; } }
+        #search:focus { outline: 1px solid var(--text-link); }
+        
+        /* Layer 1: Core Navigation Categories */
+        .tab-bar { display: flex; gap: 4px; padding: 4px 12px; background: rgba(0,0,0,0.15); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        @media (min-width: 640px) { .tab-bar { padding: 4px 16px; } }
+        .tab-btn { background: none; border: 1px solid transparent; padding: 5px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; color: #8b949e; font-family: inherit; }
+        .tab-btn.active { background: var(--bg); border-color: var(--border); color: #fff; font-weight: 600; }
+
+        /* Layer 2: Skippable Secondary Sub-Section Anchors */
+        .section-bar { display: flex; gap: 6px; padding: 4px 12px; background: rgba(0,0,0,0.05); overflow-x: auto; font-size: 11px; white-space: nowrap; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+        @media (min-width: 640px) { .section-bar { padding: 4px 16px; } }
+        .section-link { color: #8b949e; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid transparent; }
+        .section-link.active { color: var(--accent-green); border-color: rgba(52, 211, 153, 0.2); background: rgba(52, 211, 153, 0.05); }
+
+        /* Fixed Viewport Container Layer (Guarantees scrolling content fields clear absolute screen baselines) */
+        .container { 
+            flex: 1; 
+            padding: 12px; 
+            overflow-y: auto; 
+            box-sizing: border-box; 
+            scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+        @media (min-width: 640px) { .container { padding: 16px; } }
+        
+        /* Solid Flat Technical Command Grid */
+        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media (min-width: 768px) { .matrix-grid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 12px; } }
+        
+        .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
+        .cmd-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; }
+        .syntax-box span.placeholder { color: var(--accent-pink); font-weight: normal; } 
+
+        /* Flat Flag Data Lists */
+        .flag-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
+        .flag-row { border-bottom: 1px solid var(--border); }
+        .flag-row:last-child { border-bottom: none; }
+        .flag-cell-name { width: 95px; font-weight: bold; color: var(--accent-green); padding: 5px 0; vertical-align: top; }
+        .flag-cell-desc { color: var(--text-main); padding: 5px 0; line-height: 1.4; word-break: break-word; }
+        .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; }
+
+        /* Clean Documentation Reading Layout */
+        .blog-wrapper { max-width: 800px; margin: 0 auto; display: none; padding-bottom: 30px; }
+        .blog-post { 
+            background: var(--surface); border: 1px solid var(--border); border-radius: 6px; 
+            padding: clamp(14px, 4vw, 32px); box-sizing: border-box; margin-bottom: 14px; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; 
+        }
+        .blog-post h2 { font-size: 18px; color: #fff; margin: 0 0 12px 0; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+        @media (min-width: 640px) { .blog-post h2 { font-size: 20px; } }
+        .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; }
+        .blog-post code { background: var(--code-bg); color: var(--accent-pink); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); }
+        
+        /* Clear Copy Command Containers */
+        .code-block-wrapper { background: var(--code-bg); border: 1px solid var(--border); border-left: 2px solid var(--accent-green); padding: 10px; border-radius: 4px; margin: 12px 0; cursor: pointer; overflow-x: auto; }
+        .code-block-wrapper code { color: var(--accent-green); font-family: monospace; font-size: 12px; white-space: pre; border: none; background: none; padding: 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="top-row">
+            <div class="logo">Blitz Command Vault</div>
+            <input type="text" id="search" placeholder="Filter commands... [/]" inputmode="search" autocomplete="off">
+        </div>
+        <div class="tab-bar" id="tab-bar"></div>
+        <div class="section-bar" id="section-bar"></div>
+    </header>
+
+    <main class="container" id="main-scroll-container">
+        <div class="matrix-grid" id="card-grid"></div>
+        <div class="blog-wrapper" id="blog-view"></div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
