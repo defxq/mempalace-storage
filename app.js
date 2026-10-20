@@ -20,19 +20,17 @@ function toggleSidebarMenu(shouldOpen) {
     }
 }
 
+// FIXED FONT CONTROLLER: Prevents infinite page rendering loops
 function modifyTextScale(pixelDelta) {
     const nextSize = currentFontSizePixels + pixelDelta;
     
-    // Bounds restriction guard enforcement checkpoint
     if (nextSize < FONT_MIN_BOUNDS || nextSize > FONT_MAX_BOUNDS) return;
     
     currentFontSizePixels = nextSize;
     
-    // Apply text metrics update directly into DOM element tags
     document.getElementById('scaler-indicator').innerText = `${currentFontSizePixels}px`;
     document.body.style.fontSize = `${currentFontSizePixels}px`;
     
-    // Dynamically ripple down updates to keep specific code box fonts aligned
     const codeBlocks = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body');
     codeBlocks.forEach(block => {
         block.style.fontSize = `${currentFontSizePixels - 1}px`;
@@ -42,6 +40,7 @@ function modifyTextScale(pixelDelta) {
 async function bootRevisionEngine() {
     try {
         const response = await fetch(`./data.json?t=${Date.now()}`);
+        if (!response.ok) throw new Error("Database file missing.");
         rawVaultData = await response.json();
         
         const cardGrid = document.getElementById('card-grid');
@@ -66,6 +65,7 @@ async function bootRevisionEngine() {
             return;
         }
 
+        // FIXED KEY SOLVER: Gracefully checks for 'tab' first, falling back onto 'category' automatically
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
         
         if (extractedTabs.length === 0) {
@@ -90,6 +90,7 @@ async function bootRevisionEngine() {
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
+
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -196,7 +197,7 @@ function renderActiveDatabasePayload() {
                     <div class="syntax-box">${item.syntax || ''}</div>
             `;
 
-            if (item.flags && item.flags.length > 0 && item.flags.flag !== "Default") {
+            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
                 cardHTML += `<table class="flag-table">`;
                 item.flags.forEach(f => {
                     cardHTML += `
@@ -217,8 +218,10 @@ function renderActiveDatabasePayload() {
         }).join('');
     }
     
-    // Maintain active font size mappings whenever elements are drawn dynamically
-    modifyTextScale(0);
+    const codeBlocks = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body');
+    codeBlocks.forEach(block => {
+        block.style.fontSize = `${currentFontSizePixels - 1}px`;
+    });
 }
 
 window.addEventListener('DOMContentLoaded', bootRevisionEngine);

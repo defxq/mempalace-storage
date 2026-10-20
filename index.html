@@ -23,6 +23,7 @@
             background: var(--bg);
             color: var(--text-main); 
             font-size: 13px; 
+            height: 100vh;
             height: 100dvh; 
             display: flex;
             flex-direction: column; 
@@ -34,6 +35,7 @@
             background: var(--surface);
             border-bottom: 1px solid var(--border); 
             flex-shrink: 0; 
+            width: 100%;
         }
         .top-row { 
             display: flex; align-items: center; justify-content: space-between; padding: 12px;
@@ -44,14 +46,13 @@
         .logo { font-weight: 700; color: #fff; letter-spacing: -0.2px; font-size: 13px; text-transform: uppercase; }
         
         /* Control Interface Navigation Triggers */
-        .controls-wrapper { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between; }
-        @media (min-width: 640px) { .controls-wrapper { width: auto; justify-content: flex-end; } }
+        .controls-wrapper { display: flex; align-items: center; gap: 8px; }
         
         #search { 
             background: var(--code-bg); border: 1px solid var(--border); 
-            color: #fff; padding: 6px 12px; width: 65%; border-radius: 4px; font-family: inherit; box-sizing: border-box;
+            color: #fff; padding: 6px 12px; width: 140px; border-radius: 4px; font-family: inherit; box-sizing: border-box;
         }
-        @media (min-width: 640px) { #search { width: 260px; } }
+        @media (min-width: 640px) { #search { width: 240px; } }
         #search:focus { outline: 1px solid var(--text-link); }
 
         .menu-btn {
@@ -74,17 +75,15 @@
         .container { 
             flex: 1; padding: 12px; overflow-y: auto; box-sizing: border-box; 
             scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-            margin-bottom: env(safe-area-inset-bottom);
         }
         @media (min-width: 640px) { .container { padding: 16px; } }
         
-        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; w-full; }
         @media (min-width: 768px) { .matrix-grid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 12px; } }
         
         .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
         .cmd-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* FIXED NEWLINE WRAPPERS: Evaluates line breaks gracefully */
         .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
         .syntax-box span.placeholder { color: var(--accent-pink); font-weight: normal; } 
 
@@ -92,16 +91,13 @@
         .flag-row { border-bottom: 1px solid var(--border); }
         .flag-row:last-child { border-bottom: none; }
         .flag-cell-name { width: 95px; font-weight: bold; color: var(--accent-green); padding: 5px 0; vertical-align: top; }
-        
-        /* FIXED NEWLINE FLAGS VALUE CHANNELS */
         .flag-cell-desc { color: var(--text-main); padding: 5px 0; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+        
         .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; white-space: pre-wrap; }
 
         .blog-wrapper { max-width: 800px; margin: 0 auto; display: none; padding-bottom: 30px; }
         .blog-post { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: clamp(14px, 4vw, 32px); box-sizing: border-box; margin-bottom: 14px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
         .blog-post h2 { font-size: 18px; color: #fff; margin: 0 0 12px 0; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-        
-        /* FIXED NEWLINE DESCRIPTION CHANNELS */
         .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; white-space: pre-wrap; }
         .blog-post code { background: var(--code-bg); color: var(--accent-pink); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); }
         
@@ -122,9 +118,12 @@
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 990; display: none; }
         .sidebar-overlay.open-pane { display: block; }
 
-        .drawer-title { font-size: 12px; font-weight: bold; color: #fff; letter-spacing: 1px; uppercase; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
+        .drawer-title { 
+            font-size: 12px; font-weight: bold; color: #fff; letter-spacing: 1px; 
+            text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; 
+        }
         .config-row { display: flex; flex-direction: column; gap: 8px; }
-        .config-label { font-size: 11px; color: #8b949e; uppercase; }
+        .config-label { font-size: 11px; color: #8b949e; text-transform: uppercase; }
         
         .font-scaler-deck { display: flex; align-items: center; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
         .scaler-btn { flex: 1; background: none; border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: bold; padding: 10px 0; cursor: pointer; transition: background 0.15s; }
@@ -154,8 +153,6 @@
 
         <div class="config-row">
             <div class="config-label">Active Core Theme:</div>
-        <div class="config-row">
-            <div class="config-label">Active Core Theme:</div>
             <div class="link-placeholder-box" style="color: var(--accent-green); border-color: rgba(52,211,153,0.2); background: rgba(52,211,153,0.02)">
                 ● MATTE INDUSTRIAL DARK
             </div>
@@ -177,8 +174,8 @@
                 <button type="button" class="menu-btn" onclick="toggleSidebarMenu(true)">⚙️ MENU</button>
             </div>
         </div>
-        <div class="tab-bar" id="tab-bar"></div>
-        <div class="section-bar" id="section-bar"></div>
+        <div id="tab-bar" class="tab-bar"></div>
+        <div id="section-bar" class="section-bar"></div>
     </header>
 
     <main class="container" id="main-scroll-container">
