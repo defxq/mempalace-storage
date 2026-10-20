@@ -51,5 +51,13 @@
     "section": "General",
     "title": "Untitled Log Entry",
     "content": "Test <div class=\"code-block-wrapper\" <span class=\"code-inline\">onclick</span>=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>etst</code></pre></div>"
+  },
+  {
+    "id": "1792480192470",
+    "tab": "Test",
+    "layoutMode": "concept",
+    "section": "General",
+    "title": "Dip",
+    "content": "Ibisks ks this is a <div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>block</code></pre></div> \r\n<div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>Block</code></pre></div>\r\nNot block\r\n"
   }
 ]
