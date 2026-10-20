@@ -36,5 +36,20 @@
     "section": "General2",
     "title": "Titled log entry",
     "content": "Blog1\n===============================\nSystemd\n===============================\n================\nSystemd\n============================="
+  },
+  {
+    "id": "1792478514844",
+    "tab": "Yu",
+    "layoutMode": "lookup",
+    "section": "General",
+    "command": "Test",
+    "syntax": "Test",
+    "flags": [
+      {
+        "flag": "Test5",
+        "desc": "Parameter execution enabled."
+      }
+    ],
+    "notes": "Quick reference."
   }
 ]
