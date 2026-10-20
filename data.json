@@ -28,5 +28,28 @@
       }
     ],
     "notes": "Quick reference."
+  },
+  {
+    "id": "1792480017741",
+    "tab": "Docker1",
+    "layoutMode": "lookup",
+    "section": "General",
+    "command": "",
+    "syntax": "",
+    "flags": [
+      {
+        "flag": "Default",
+        "desc": "Standard parameter."
+      }
+    ],
+    "notes": "Quick reference."
+  },
+  {
+    "id": "1792480054055",
+    "tab": "Cc",
+    "layoutMode": "concept",
+    "section": "General",
+    "title": "Untitled Log Entry",
+    "content": "Test <div class=\"code-block-wrapper\" <span class=\"code-inline\">onclick</span>=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>etst</code></pre></div>"
   }
 ]
