@@ -6,5 +6,20 @@
     "section": "General",
     "title": "Deep",
     "content": "Write logs"
+  },
+  {
+    "id": "1792473904423",
+    "tab": "Docker",
+    "layoutMode": "lookup",
+    "section": "General",
+    "command": "Tar",
+    "syntax": "Tar -czvf",
+    "flags": [
+      {
+        "flag": "-c",
+        "desc": "Parameter execution enabled."
+      }
+    ],
+    "notes": "Yest"
   }
 ]
