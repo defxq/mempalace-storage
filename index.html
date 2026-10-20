@@ -15,6 +15,7 @@
             --accent-green: #34d399;
             --accent-pink: #f43f5e; 
             --code-bg: #010409;     
+            --amber-glow: #ff8800;
         }
         
         body { 
@@ -38,27 +39,43 @@
             width: 100%;
         }
         .top-row { 
-            display: flex; align-items: center; justify-content: space-between; padding: 12px;
+            display: flex; flex-direction: column; gap: 10px; padding: 12px;
         }
         @media (min-width: 640px) {
-            .top-row { padding: 12px 16px; }
+            .top-row { flex-direction: row; align-items: center; justify-content: space-between; padding: 12px 16px; }
         }
         .logo { font-weight: 700; color: #fff; letter-spacing: -0.2px; font-size: 13px; text-transform: uppercase; }
         
-        /* Control Interface Navigation Triggers */
-        .controls-wrapper { display: flex; align-items: center; gap: 8px; }
-        
-        #search { 
-            background: var(--code-bg); border: 1px solid var(--border); 
-            color: #fff; padding: 6px 12px; width: 140px; border-radius: 4px; font-family: inherit; box-sizing: border-box;
+        /* SEARCH MATRIX AND CONTROLLER NAVIGATOR WRAPPERS */
+        .controls-wrapper { display: flex; align-items: center; gap: 6px; width: 100%; }
+        @media (min-width: 640px) { .controls-wrapper { width: auto; } }
+
+        .search-container {
+            position: relative; flex: 1; display: flex; align-items: center;
+            background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px;
         }
-        @media (min-width: 640px) { #search { width: 240px; } }
-        #search:focus { outline: 1px solid var(--text-link); }
+        @media (min-width: 640px) { .search-container { width: 340px; flex: none; } }
+        .search-container:focus-within { outline: 1px solid var(--text-link); }
+
+        #search { 
+            background: transparent; border: none; color: #fff; padding: 6px 12px; 
+            width: 100%; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;
+        }
+        
+        /* HIGH-DENSITY TIMELINE NAVIGATOR BUTTON DECKS */
+        .navigator-deck { display: none; align-items: center; gap: 2px; padding-right: 6px; flex-shrink: 0; }
+        .nav-stats { font-size: 10px; color: var(--accent-green); font-weight: bold; padding: 0 4px; white-space: nowrap; }
+        .nav-arrow-btn {
+            background: var(--surface); border: 1px solid var(--border); color: #fff;
+            font-size: 9px; width: 22px; height: 22px; display: flex; align-items: center;
+            justify-content: center; border-radius: 3px; cursor: pointer; transition: background 0.1s;
+        }
+        .nav-arrow-btn:active { background: var(--border); }
 
         .menu-btn {
             background: var(--code-bg); border: 1px solid var(--border); color: #fff;
             padding: 6px 12px; border-radius: 4px; font-family: inherit; font-size: 12px;
-            cursor: pointer; font-weight: bold; transition: all 0.15s ease;
+            cursor: pointer; font-weight: bold; flex-shrink: 0;
         }
         .menu-btn:active { background: var(--border); }
         
@@ -78,14 +95,13 @@
         }
         @media (min-width: 640px) { .container { padding: 16px; } }
         
-        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; w-full; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
         @media (min-width: 768px) { .matrix-grid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 12px; } }
         
-        .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
+        .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; transition: border-color 0.2s; }
         .cmd-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-        .syntax-box span.placeholder { color: var(--accent-pink); font-weight: normal; } 
 
         .flag-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
         .flag-row { border-bottom: 1px solid var(--border); }
@@ -96,22 +112,34 @@
         .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; white-space: pre-wrap; }
 
         .blog-wrapper { max-width: 800px; margin: 0 auto; display: none; padding-bottom: 30px; }
-        .blog-post { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: clamp(14px, 4vw, 32px); box-sizing: border-box; margin-bottom: 14px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+        .blog-post { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: clamp(14px, 4vw, 24px); box-sizing: border-box; margin-bottom: 14px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; transition: border-color 0.2s; }
         .blog-post h2 { font-size: 18px; color: #fff; margin: 0 0 12px 0; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
         .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; white-space: pre-wrap; }
-        .blog-post code { background: var(--code-bg); color: var(--accent-pink); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); }
         
-        .code-block-wrapper { background: var(--code-bg); border: 1px solid var(--border); border-left: 2px solid var(--accent-green); padding: 10px; border-radius: 4px; margin: 12px 0; cursor: pointer; overflow-x: auto; }
-        .code-block-wrapper code { color: var(--accent-green); font-family: monospace; font-size: 12px; white-space: pre; border: none; background: none; padding: 0; }
+        /* HARDWARE STYLED AMBER MARK HIGHLIGHTS SETUP */
+        mark.search-highlight {
+            background: rgba(255, 136, 0, 0.25); color: #fff; 
+            border-bottom: 1px solid var(--amber-glow); padding: 1px 0; border-radius: 1px;
+        }
+        mark.search-highlight.current-focus-node {
+            background: var(--amber-glow); color: #000; font-weight: bold;
+            box-shadow: 0 0 8px var(--amber-glow);
+        }
+        
+        /* Focused Active Card Border Ripple Rules */
+        .glass-card.highlight-focus-ring, .blog-post.highlight-focus-ring {
+            border-color: var(--amber-glow) !important;
+            box-shadow: 0 0 12px rgba(255, 136, 0, 0.15);
+        }
 
         .empty-notice { display: flex; align-items: center; justify-content: center; height: 200px; border: 1px dashed var(--border); border-radius: 6px; background: var(--surface); color: var(--text-main); font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* INDUSTRIAL COCKPIT SETTINGS SLIDE DRAWER SIDEBAR */
+        /* COCKPIT SETTINGS SLIDE DRAWER SIDEBAR */
         .sidebar-drawer {
             position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
             background: var(--surface); border-left: 1px solid var(--border);
             box-shadow: -4px 0 24px rgba(0,0,0,0.4); z-index: 999;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;
         }
         .sidebar-drawer.open-pane { right: 0; }
@@ -135,13 +163,9 @@
 </head>
 <body>
 
-    <!-- Native Interaction Overlay Layers -->
-    <div id="drawer-overlay" class="sidebar-overlay" onclick="toggleSidebarMenu(false)"></div>
-    
     <div id="settings-drawer" class="sidebar-drawer">
         <div class="drawer-title">⚙️ SYSTEM CONFIG PANEL</div>
         
-        <!-- TEXT SCALE CONTROLLERS -->
         <div class="config-row">
             <div class="config-label">Workspace Font Scaling:</div>
             <div class="font-scaler-deck">
@@ -157,20 +181,20 @@
                 ● MATTE INDUSTRIAL DARK
             </div>
         </div>
-
-        <div class="config-row" style="margin-top: auto;">
-            <div class="config-label">Future Extension Node:</div>
-            <div class="link-placeholder-box">
-                [LINKED_ROUTE_PLACEHOLDER]
-            </div>
-        </div>
     </div>
 
     <header>
         <div class="top-row">
             <div class="logo">Mempalace Vault</div>
             <div class="controls-wrapper">
-                <input type="text" id="search" placeholder="Filter profiles... [/]" inputmode="search" autocomplete="off">
+                <div class="search-container">
+                    <input type="text" id="search" placeholder="Search and track text... [/]" autocomplete="off">
+                    <div id="search-nav" class="navigator-deck">
+                        <span id="nav-count" class="nav-stats">0/0</span>
+                        <button type="button" class="nav-arrow-btn" onclick="shiftHighlightTarget(-1)">▲</button>
+                        <button type="button" class="nav-arrow-btn" onclick="shiftHighlightTarget(1)">▼</button>
+                    </div>
+                </div>
                 <button type="button" class="menu-btn" onclick="toggleSidebarMenu(true)">⚙️ MENU</button>
             </div>
         </div>

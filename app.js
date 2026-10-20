@@ -7,23 +7,22 @@ let currentFontSizePixels = 13;
 const FONT_MIN_BOUNDS = 10;
 const FONT_MAX_BOUNDS = 22;
 
+// TEXT HIGHLIGHT TRACKER TARGET STATE METRICS
+let capturedHighlightNodes = [];
+let activeHighlightIndex = -1;
+
 function toggleSidebarMenu(shouldOpen) {
     const drawer = document.getElementById('settings-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    
     if (shouldOpen) {
         drawer.classList.add('open-pane');
-        overlay.classList.add('open-pane');
     } else {
         drawer.classList.remove('open-pane');
-        overlay.classList.remove('open-pane');
     }
 }
 
-// FIXED FONT CONTROLLER: Prevents infinite page rendering loops
+// FIXED: Isolated font scaling routine to safely update elements without triggering infinite render loops
 function modifyTextScale(pixelDelta) {
     const nextSize = currentFontSizePixels + pixelDelta;
-    
     if (nextSize < FONT_MIN_BOUNDS || nextSize > FONT_MAX_BOUNDS) return;
     
     currentFontSizePixels = nextSize;
@@ -31,8 +30,8 @@ function modifyTextScale(pixelDelta) {
     document.getElementById('scaler-indicator').innerText = `${currentFontSizePixels}px`;
     document.body.style.fontSize = `${currentFontSizePixels}px`;
     
-    const codeBlocks = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body');
-    codeBlocks.forEach(block => {
+    const elementsToScale = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body, .blog-post p, .flag-cell-name, .flag-cell-desc, .card-notes');
+    elementsToScale.forEach(block => {
         block.style.fontSize = `${currentFontSizePixels - 1}px`;
     });
 }
@@ -65,7 +64,6 @@ async function bootRevisionEngine() {
             return;
         }
 
-        // FIXED KEY SOLVER: Gracefully checks for 'tab' first, falling back onto 'category' automatically
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
         
         if (extractedTabs.length === 0) {
@@ -83,14 +81,14 @@ async function bootRevisionEngine() {
         renderSectionBar();
         renderActiveDatabasePayload();
 
-        document.getElementById('search').addEventListener('input', renderActiveDatabasePayload);
+        // Real-time keyword tracker input events listener hook
+        document.getElementById('search').addEventListener('input', executeLiveTextHighlighterScanner);
 
     } catch (err) {
         console.error("Vault fetching exception: ", err.message);
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
-
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -102,7 +100,6 @@ function renderTabBar(tabs) {
 
 function renderSectionBar() {
     const sectionBar = document.getElementById('section-bar');
-    
     const relatedItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
     const uniqueSections = [...new Set(relatedItems.map(item => item.section))].filter(Boolean);
 
@@ -112,7 +109,6 @@ function renderSectionBar() {
     }
 
     let sectionButtonsHTML = `<span class="section-link ${currentActiveSection === 'All' ? 'active' : ''}" onclick="switchSubSection('All')">ALL</span>`;
-    
     sectionButtonsHTML += uniqueSections.map(sec => `
         <span class="section-link ${currentActiveSection === sec ? 'active' : ''}" onclick="switchSubSection('${sec.replace(/'/g, "\\'")}')">
             ${sec.toUpperCase()}
@@ -126,6 +122,12 @@ function switchCategoryTab(targetTab) {
     currentActiveTab = targetTab;
     currentActiveSection = "All"; 
     
+    // Reset any ongoing highlighted matching loops on category jump
+    document.getElementById('search').value = '';
+    document.getElementById('search-nav').style.display = 'none';
+    capturedHighlightNodes = [];
+    activeHighlightIndex = -1;
+
     const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
     renderTabBar(extractedTabs);
     renderSectionBar();
@@ -134,6 +136,12 @@ function switchCategoryTab(targetTab) {
 
 function switchSubSection(targetSection) {
     currentActiveSection = targetSection;
+    
+    document.getElementById('search').value = '';
+    document.getElementById('search-nav').style.display = 'none';
+    capturedHighlightNodes = [];
+    activeHighlightIndex = -1;
+
     renderSectionBar();
     renderActiveDatabasePayload();
 }
@@ -141,25 +149,12 @@ function switchSubSection(targetSection) {
 function renderActiveDatabasePayload() {
     const cardGrid = document.getElementById('card-grid');
     const blogView = document.getElementById('blog-view');
-    const searchQuery = document.getElementById('search').value.toLowerCase();
 
+    // Filter database values purely based on category tab and section index selection rules
     const workspacePool = rawVaultData.filter(item => {
         const matchesTab = (item.tab || item.category) === currentActiveTab;
         const matchesSection = currentActiveSection === 'All' || item.section === currentActiveSection;
-        
-        const cmdLower = (item.command || '').toLowerCase();
-        const synLower = (item.syntax || '').toLowerCase();
-        const notesLower = (item.notes || '').toLowerCase();
-        const titleLower = (item.title || '').toLowerCase();
-        const contentLower = (item.content || '').toLowerCase();
-        
-        return matchesTab && matchesSection && (
-            cmdLower.includes(searchQuery) || 
-            synLower.includes(searchQuery) || 
-            notesLower.includes(searchQuery) ||
-            titleLower.includes(searchQuery) ||
-            contentLower.includes(searchQuery)
-        );
+        return matchesTab && matchesSection;
     });
 
     const representSample = rawVaultData.find(item => (item.tab || item.category) === currentActiveTab);
@@ -170,14 +165,14 @@ function renderActiveDatabasePayload() {
         blogView.style.display = 'block';
 
         if (workspacePool.length === 0) {
-            blogView.innerHTML = `<p style="color:var(--text-main); font-style:italic; padding:12px;">No documentation steps found matching parameters.</p>`;
+            blogView.innerHTML = `<p style="color:var(--text-main); font-style:italic; padding:12px;">No documentation steps found.</p>`;
             return;
         }
 
         blogView.innerHTML = workspacePool.map(item => `
             <div class="blog-post">
                 <h2>${item.title || 'Untitled Segment Log'}</h2>
-                <p>${item.content || ''}</p>
+                <p class="continuous-markdown-body">${item.content || ''}</p>
             </div>
         `).join('');
 
@@ -197,7 +192,7 @@ function renderActiveDatabasePayload() {
                     <div class="syntax-box">${item.syntax || ''}</div>
             `;
 
-            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
+            if (item.flags && item.flags.length > 0 && item.flags.flag !== "Default") {
                 cardHTML += `<table class="flag-table">`;
                 item.flags.forEach(f => {
                     cardHTML += `
@@ -218,10 +213,92 @@ function renderActiveDatabasePayload() {
         }).join('');
     }
     
-    const codeBlocks = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body');
-    codeBlocks.forEach(block => {
-        block.style.fontSize = `${currentFontSizePixels - 1}px`;
+    // Apply user selected text scale settings immediately to raw items
+    modifyTextScale(0);
+}
+
+// TEXT PARSING HIGHLIGHTER NAVIGATOR MATRIX ENGINE
+function executeLiveTextHighlighterScanner() {
+    const query = document.getElementById('search').value.trim().toLowerCase();
+    const navDeck = document.getElementById('search-nav');
+    
+    // Wipe out any existing active highlight markers before recalculating matching elements
+    renderActiveDatabasePayload();
+
+    if (!query) {
+        navDeck.style.display = 'none';
+        capturedHighlightNodes = [];
+        activeHighlightIndex = -1;
+        return;
+    }
+
+    // Isolate target containers based on active tab category profile
+    const targetTextNodes = document.querySelectorAll('.cmd-name, .syntax-box, .flag-cell-name, .flag-cell-desc, .card-notes, .blog-post h2, .continuous-markdown-body');
+    
+    targetTextNodes.forEach(node => {
+        const originalRawHTML = node.innerHTML;
+        // Escape special regex token values to keep compiling bulletproof
+        const safeQueryToken = query.replace(/[-\/\\^\$*+?.()|[\]{}]/g, '\\$&');
+        const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
+
+        if (originalRawHTML.match(searchRegex)) {
+            // Inject clean styled marker tokens directly across all matching word fragments
+            node.innerHTML = originalRawHTML.replace(searchRegex, `<mark class="search-highlight">$1</mark>`);
+        }
     });
+
+    // Harvest full matching elements tree from active viewport DOM container
+    capturedHighlightNodes = Array.from(document.querySelectorAll('mark.search-highlight'));
+    const totalMatchesCount = capturedHighlightNodes.length;
+
+    if (totalMatchesCount > 0) {
+        activeHighlightIndex = 0;
+        navDeck.style.display = 'flex';
+        document.getElementById('nav-count').innerText = `1/${totalMatchesCount}`;
+        highlightActiveSelectionTarget(true); // Jump-snap directly to the initial matching node
+    } else {
+        navDeck.style.display = 'none';
+        capturedHighlightNodes = [];
+        activeHighlightIndex = -1;
+    }
+}
+
+function shiftHighlightTarget(indexDirectionDelta) {
+    if (capturedHighlightNodes.length === 0) return;
+
+    // Clear border indicators and focal highlight styling loops from old item
+    highlightActiveSelectionTarget(false);
+
+    // Compute circular index boundary looping mapping variables
+    activeHighlightIndex += indexDirectionDelta;
+    if (activeHighlightIndex >= capturedHighlightNodes.length) activeHighlightIndex = 0;
+    if (activeHighlightIndex < 0) activeHighlightIndex = capturedHighlightNodes.length - 1;
+
+    // Update index trackers display counter metrics text
+    document.getElementById('nav-count').innerText = `${activeHighlightIndex + 1}/${capturedHighlightNodes.length}`;
+    highlightActiveSelectionTarget(true);
+}
+
+function highlightActiveSelectionTarget(shouldApplyFocus) {
+    const activeTargetNode = capturedHighlightNodes[activeHighlightIndex];
+    if (!activeTargetNode) return;
+
+    // Isolate the immediate container item row layout envelope frame box block
+    const parentCardEnvelope = activeTargetNode.closest('.glass-card, .blog-post');
+
+    if (shouldApplyFocus) {
+        activeTargetNode.classList.add('current-focus-node');
+        if (parentCardEnvelope) parentCardEnvelope.classList.add('highlight-focus-ring');
+
+        // Smooth hardware-accelerated viewport alignment jump
+        activeTargetNode.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    } else {
+        activeTargetNode.classList.remove('current-focus-node');
+        if (parentCardEnvelope) parentCardEnvelope.classList.remove('highlight-focus-ring');
+    }
 }
 
 window.addEventListener('DOMContentLoaded', bootRevisionEngine);
