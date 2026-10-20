@@ -77,7 +77,7 @@
     "layoutMode": "concept",
     "section": "General2",
     "title": "Titled log entry",
-    "content": "Blog1"
+    "content": "Blog1\n===============================\nSystemd\n===============================\n================\nSystemd\n============================="
   },
   {
     "id": "1792476520945",
