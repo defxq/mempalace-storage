@@ -2,9 +2,45 @@ let rawVaultData = [];
 let currentActiveTab = "";
 let currentActiveSection = "All";
 
+// SIDEBAR ACCESSIBILITY SCALING MANAGEMENT STATE
+let currentFontSizePixels = 13;
+const FONT_MIN_BOUNDS = 10;
+const FONT_MAX_BOUNDS = 22;
+
+function toggleSidebarMenu(shouldOpen) {
+    const drawer = document.getElementById('settings-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    
+    if (shouldOpen) {
+        drawer.classList.add('open-pane');
+        overlay.classList.add('open-pane');
+    } else {
+        drawer.classList.remove('open-pane');
+        overlay.classList.remove('open-pane');
+    }
+}
+
+function modifyTextScale(pixelDelta) {
+    const nextSize = currentFontSizePixels + pixelDelta;
+    
+    // Bounds restriction guard enforcement checkpoint
+    if (nextSize < FONT_MIN_BOUNDS || nextSize > FONT_MAX_BOUNDS) return;
+    
+    currentFontSizePixels = nextSize;
+    
+    // Apply text metrics update directly into DOM element tags
+    document.getElementById('scaler-indicator').innerText = `${currentFontSizePixels}px`;
+    document.body.style.fontSize = `${currentFontSizePixels}px`;
+    
+    // Dynamically ripple down updates to keep specific code box fonts aligned
+    const codeBlocks = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body');
+    codeBlocks.forEach(block => {
+        block.style.fontSize = `${currentFontSizePixels - 1}px`;
+    });
+}
+
 async function bootRevisionEngine() {
     try {
-        // Pull cache-busted database logs via relative pathways
         const response = await fetch(`./data.json?t=${Date.now()}`);
         rawVaultData = await response.json();
         
@@ -13,7 +49,6 @@ async function bootRevisionEngine() {
         const tabBar = document.getElementById('tab-bar');
         const sectionBar = document.getElementById('section-bar');
 
-        // PRISTINE FALLBACK RENDER STRATEGY: Hides standard layout if no data exists
         if (!rawVaultData || rawVaultData.length === 0) {
             tabBar.innerHTML = '';
             sectionBar.innerHTML = '';
@@ -31,7 +66,6 @@ async function bootRevisionEngine() {
             return;
         }
 
-        // Gather unique categories from database objects safely
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
         
         if (extractedTabs.length === 0) {
@@ -41,7 +75,6 @@ async function bootRevisionEngine() {
             return;
         }
 
-        // Fallback default state protection rule
         if (!currentActiveTab || !extractedTabs.includes(currentActiveTab)) {
             currentActiveTab = extractedTabs[0];
         }
@@ -50,7 +83,6 @@ async function bootRevisionEngine() {
         renderSectionBar();
         renderActiveDatabasePayload();
 
-        // Bind interactive real-time typing query hooks
         document.getElementById('search').addEventListener('input', renderActiveDatabasePayload);
 
     } catch (err) {
@@ -58,7 +90,6 @@ async function bootRevisionEngine() {
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
-
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -71,7 +102,6 @@ function renderTabBar(tabs) {
 function renderSectionBar() {
     const sectionBar = document.getElementById('section-bar');
     
-    // Filter down array listings based on current selected tab to harvest child keys
     const relatedItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
     const uniqueSections = [...new Set(relatedItems.map(item => item.section))].filter(Boolean);
 
@@ -93,7 +123,7 @@ function renderSectionBar() {
 
 function switchCategoryTab(targetTab) {
     currentActiveTab = targetTab;
-    currentActiveSection = "All"; // Reset sub anchor navigation values on primary change
+    currentActiveSection = "All"; 
     
     const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
     renderTabBar(extractedTabs);
@@ -112,7 +142,6 @@ function renderActiveDatabasePayload() {
     const blogView = document.getElementById('blog-view');
     const searchQuery = document.getElementById('search').value.toLowerCase();
 
-    // Filter database array variables down to match tab, section, and typing parameters
     const workspacePool = rawVaultData.filter(item => {
         const matchesTab = (item.tab || item.category) === currentActiveTab;
         const matchesSection = currentActiveSection === 'All' || item.section === currentActiveSection;
@@ -123,16 +152,15 @@ function renderActiveDatabasePayload() {
         const titleLower = (item.title || '').toLowerCase();
         const contentLower = (item.content || '').toLowerCase();
         
-        const matchesSearch = cmdLower.includes(searchQuery) || 
-                              synLower.includes(searchQuery) || 
-                              notesLower.includes(searchQuery) ||
-                              titleLower.includes(searchQuery) ||
-                              contentLower.includes(searchQuery);
-
-        return matchesTab && matchesSection && matchesSearch;
+        return matchesTab && matchesSection && (
+            cmdLower.includes(searchQuery) || 
+            synLower.includes(searchQuery) || 
+            notesLower.includes(searchQuery) ||
+            titleLower.includes(searchQuery) ||
+            contentLower.includes(searchQuery)
+        );
     });
 
-    // Check if the current context profile consists of Card Matrices or Blogs
     const representSample = rawVaultData.find(item => (item.tab || item.category) === currentActiveTab);
     const isBlogTrack = representSample && (representSample.layoutMode === 'concept' || representSample.title);
 
@@ -148,7 +176,7 @@ function renderActiveDatabasePayload() {
         blogView.innerHTML = workspacePool.map(item => `
             <div class="blog-post">
                 <h2>${item.title || 'Untitled Segment Log'}</h2>
-                <div class="continuous-markdown-body">${item.content || ''}</div>
+                <p>${item.content || ''}</p>
             </div>
         `).join('');
 
@@ -168,7 +196,7 @@ function renderActiveDatabasePayload() {
                     <div class="syntax-box">${item.syntax || ''}</div>
             `;
 
-            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
+            if (item.flags && item.flags.length > 0 && item.flags.flag !== "Default") {
                 cardHTML += `<table class="flag-table">`;
                 item.flags.forEach(f => {
                     cardHTML += `
@@ -188,7 +216,9 @@ function renderActiveDatabasePayload() {
             return cardHTML;
         }).join('');
     }
+    
+    // Maintain active font size mappings whenever elements are drawn dynamically
+    modifyTextScale(0);
 }
 
-// Initialise execution on content boot load loops
 window.addEventListener('DOMContentLoaded', bootRevisionEngine);

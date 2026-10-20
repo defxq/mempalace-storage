@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mempalace</title>
+    <title>Mempalace Vault Viewer</title>
     <style>
         /* Clean Industrial Developer Spec Color Palette */
         :root { 
-            --bg: #0d1117;          /* GitHub Dark Baseline */
-            --surface: #161b22;     /* Card/Menu Gray */
-            --border: #30363d;      /* Flat Muted Borders */
-            --text-main: #c9d1d9;   /* Soft High-Contrast Text */
-            --text-link: #58a6ff;   /* Spec Link Cyan Blue */
-            --accent-green: #34d399;/* Parameter Target Green */
-            --accent-pink: #f43f5e; /* Value Placeholder Red */
-            --code-bg: #010409;     /* Deep Terminal Fill */
+            --bg: #0d1117;          
+            --surface: #161b22;     
+            --border: #30363d;      
+            --text-main: #c9d1d9;   
+            --text-link: #58a6ff;   
+            --accent-green: #34d399;
+            --accent-pink: #f43f5e; 
+            --code-bg: #010409;     
         }
         
         body { 
@@ -23,11 +23,7 @@
             background: var(--bg);
             color: var(--text-main); 
             font-size: 13px; 
-            
-            /* DYNAMIC VIEWPORT FIX */
-            height: 100vh;
             height: 100dvh; 
-            
             display: flex;
             flex-direction: column; 
             overflow: hidden;
@@ -40,19 +36,30 @@
             flex-shrink: 0; 
         }
         .top-row { 
-            display: flex; flex-direction: column; gap: 10px; padding: 12px; 
+            display: flex; align-items: center; justify-content: space-between; padding: 12px;
         }
         @media (min-width: 640px) {
-            .top-row { flex-direction: row; align-items: center; justify-content: space-between; padding: 12px 16px; }
+            .top-row { padding: 12px 16px; }
         }
         .logo { font-weight: 700; color: #fff; letter-spacing: -0.2px; font-size: 13px; text-transform: uppercase; }
         
+        /* Control Interface Navigation Triggers */
+        .controls-wrapper { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between; }
+        @media (min-width: 640px) { .controls-wrapper { width: auto; justify-content: flex-end; } }
+        
         #search { 
             background: var(--code-bg); border: 1px solid var(--border); 
-            color: #fff; padding: 6px 12px; width: 100%; border-radius: 4px; font-family: inherit; box-sizing: border-box;
+            color: #fff; padding: 6px 12px; width: 65%; border-radius: 4px; font-family: inherit; box-sizing: border-box;
         }
-        @media (min-width: 640px) { #search { width: 300px; } }
+        @media (min-width: 640px) { #search { width: 260px; } }
         #search:focus { outline: 1px solid var(--text-link); }
+
+        .menu-btn {
+            background: var(--code-bg); border: 1px solid var(--border); color: #fff;
+            padding: 6px 12px; border-radius: 4px; font-family: inherit; font-size: 12px;
+            cursor: pointer; font-weight: bold; transition: all 0.15s ease;
+        }
+        .menu-btn:active { background: var(--border); }
         
         .tab-bar { display: flex; gap: 4px; padding: 4px 12px; background: rgba(0,0,0,0.15); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
         @media (min-width: 640px) { .tab-bar { padding: 4px 16px; } }
@@ -65,12 +72,8 @@
         .section-link.active { color: var(--accent-green); border-color: rgba(52, 211, 153, 0.2); background: rgba(52, 211, 153, 0.05); }
 
         .container { 
-            flex: 1; 
-            padding: 12px; 
-            overflow-y: auto; 
-            box-sizing: border-box; 
-            scroll-behavior: smooth; 
-            -webkit-overflow-scrolling: touch;
+            flex: 1; padding: 12px; overflow-y: auto; box-sizing: border-box; 
+            scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
             margin-bottom: env(safe-area-inset-bottom);
         }
         @media (min-width: 640px) { .container { padding: 16px; } }
@@ -80,44 +83,99 @@
         
         .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
         .cmd-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; }
+        
+        /* FIXED NEWLINE WRAPPERS: Evaluates line breaks gracefully */
+        .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
         .syntax-box span.placeholder { color: var(--accent-pink); font-weight: normal; } 
 
         .flag-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
         .flag-row { border-bottom: 1px solid var(--border); }
         .flag-row:last-child { border-bottom: none; }
         .flag-cell-name { width: 95px; font-weight: bold; color: var(--accent-green); padding: 5px 0; vertical-align: top; }
-        .flag-cell-desc { color: var(--text-main); padding: 5px 0; line-height: 1.4; word-break: break-word; }
-        .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; }
+        
+        /* FIXED NEWLINE FLAGS VALUE CHANNELS */
+        .flag-cell-desc { color: var(--text-main); padding: 5px 0; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+        .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; white-space: pre-wrap; }
 
         .blog-wrapper { max-width: 800px; margin: 0 auto; display: none; padding-bottom: 30px; }
-        .blog-post { 
-            background: var(--surface); border: 1px solid var(--border); border-radius: 6px; 
-            padding: clamp(14px, 4vw, 32px); box-sizing: border-box; margin-bottom: 14px; 
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; 
-        }
+        .blog-post { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: clamp(14px, 4vw, 32px); box-sizing: border-box; margin-bottom: 14px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
         .blog-post h2 { font-size: 18px; color: #fff; margin: 0 0 12px 0; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-        @media (min-width: 640px) { .blog-post h2 { font-size: 20px; } }
-        .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; }
+        
+        /* FIXED NEWLINE DESCRIPTION CHANNELS */
+        .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; white-space: pre-wrap; }
         .blog-post code { background: var(--code-bg); color: var(--accent-pink); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); }
         
         .code-block-wrapper { background: var(--code-bg); border: 1px solid var(--border); border-left: 2px solid var(--accent-green); padding: 10px; border-radius: 4px; margin: 12px 0; cursor: pointer; overflow-x: auto; }
         .code-block-wrapper code { color: var(--accent-green); font-family: monospace; font-size: 12px; white-space: pre; border: none; background: none; padding: 0; }
 
-        /* Clean Pristine Empty State Notification Style */
-        .empty-notice {
-            display: flex; align-items: center; justify-content: center; height: 200px;
-            border: 1px dashed var(--border); border-radius: 6px; background: var(--surface);
-            color: var(--text-main); font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+        .empty-notice { display: flex; align-items: center; justify-content: center; height: 200px; border: 1px dashed var(--border); border-radius: 6px; background: var(--surface); color: var(--text-main); font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* INDUSTRIAL COCKPIT SETTINGS SLIDE DRAWER SIDEBAR */
+        .sidebar-drawer {
+            position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+            background: var(--surface); border-left: 1px solid var(--border);
+            box-shadow: -4px 0 24px rgba(0,0,0,0.4); z-index: 999;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;
         }
+        .sidebar-drawer.open-pane { right: 0; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 990; display: none; }
+        .sidebar-overlay.open-pane { display: block; }
+
+        .drawer-title { font-size: 12px; font-weight: bold; color: #fff; letter-spacing: 1px; uppercase; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
+        .config-row { display: flex; flex-direction: column; gap: 8px; }
+        .config-label { font-size: 11px; color: #8b949e; uppercase; }
+        
+        .font-scaler-deck { display: flex; align-items: center; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .scaler-btn { flex: 1; background: none; border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: bold; padding: 10px 0; cursor: pointer; transition: background 0.15s; }
+        .scaler-btn:active { background: var(--border); }
+        .scaler-value-display { width: 60px; text-align: center; font-size: 12px; font-weight: bold; color: var(--accent-green); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+
+        .link-placeholder-box { border: 1px dashed var(--border); border-radius: 4px; padding: 12px; text-align: center; color: #424b61; font-size: 11px; font-style: italic; }
     </style>
 </head>
 <body>
 
+    <!-- Native Interaction Overlay Layers -->
+    <div id="drawer-overlay" class="sidebar-overlay" onclick="toggleSidebarMenu(false)"></div>
+    
+    <div id="settings-drawer" class="sidebar-drawer">
+        <div class="drawer-title">⚙️ SYSTEM CONFIG PANEL</div>
+        
+        <!-- TEXT SCALE CONTROLLERS -->
+        <div class="config-row">
+            <div class="config-label">Workspace Font Scaling:</div>
+            <div class="font-scaler-deck">
+                <button type="button" class="scaler-btn" onclick="modifyTextScale(-1)">-</button>
+                <div id="scaler-indicator" class="scaler-value-display">13px</div>
+                <button type="button" class="scaler-btn" onclick="modifyTextScale(1)">+</button>
+            </div>
+        </div>
+
+        <div class="config-row">
+            <div class="config-label">Active Core Theme:</div>
+        <div class="config-row">
+            <div class="config-label">Active Core Theme:</div>
+            <div class="link-placeholder-box" style="color: var(--accent-green); border-color: rgba(52,211,153,0.2); background: rgba(52,211,153,0.02)">
+                ● MATTE INDUSTRIAL DARK
+            </div>
+        </div>
+
+        <div class="config-row" style="margin-top: auto;">
+            <div class="config-label">Future Extension Node:</div>
+            <div class="link-placeholder-box">
+                [LINKED_ROUTE_PLACEHOLDER]
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="top-row">
-            <div class="logo">Mempalace</div>
-            <input type="text" id="search" placeholder="Filter commands... [/]" inputmode="search" autocomplete="off">
+            <div class="logo">Mempalace Vault</div>
+            <div class="controls-wrapper">
+                <input type="text" id="search" placeholder="Filter profiles... [/]" inputmode="search" autocomplete="off">
+                <button type="button" class="menu-btn" onclick="toggleSidebarMenu(true)">⚙️ MENU</button>
+            </div>
         </div>
         <div class="tab-bar" id="tab-bar"></div>
         <div class="section-bar" id="section-bar"></div>
