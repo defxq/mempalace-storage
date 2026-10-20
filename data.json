@@ -30,21 +30,6 @@
     "notes": "Hhss"
   },
   {
-    "id": "1792474030735",
-    "tab": "Docker",
-    "layoutMode": "lookup",
-    "section": "General",
-    "command": "Tester",
-    "syntax": "Tester",
-    "flags": [
-      {
-        "flag": "-z",
-        "desc": "gzip"
-      }
-    ],
-    "notes": "Nothing"
-  },
-  {
     "id": "1792475579688",
     "tab": "Docker",
     "layoutMode": "lookup",
