@@ -11,16 +11,41 @@ const FONT_MAX_BOUNDS = 22;
 let capturedHighlightNodes = [];
 let activeHighlightIndex = -1;
 
+// FIXED MENU SLIDER DISPATCHER: Safely toggles state classes alongside masking layers
 function toggleSidebarMenu(shouldOpen) {
     const drawer = document.getElementById('settings-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    
     if (shouldOpen) {
         drawer.classList.add('open-pane');
+        overlay.classList.add('open-pane');
     } else {
         drawer.classList.remove('open-pane');
+        overlay.classList.remove('open-pane');
     }
 }
 
-// FIXED: Isolated font scaling routine to safely update elements without triggering infinite render loops
+// THEME SELECTION MATRIX ROUTINE
+function switchActiveThemeSheet(themeId) {
+    const bodyNode = document.body;
+    const btnIndustrial = document.getElementById('theme-btn-industrial');
+    const btnAmethyst = document.getElementById('theme-btn-amethyst');
+
+    if (themeId === 'amethyst') {
+        bodyNode.classList.add('theme-amethyst');
+        btnAmethyst.classList.add('active-theme-token');
+        btnIndustrial.classList.remove('active-theme-token');
+        btnAmethyst.innerText = "● MIDNIGHT AMETHYST DEEP";
+        btnIndustrial.innerText = "○ INDUSTRIAL GITHUB DARK";
+    } else {
+        bodyNode.classList.remove('theme-amethyst');
+        btnIndustrial.classList.add('active-theme-token');
+        btnAmethyst.classList.remove('active-theme-token');
+        btnIndustrial.innerText = "● INDUSTRIAL GITHUB DARK";
+        btnAmethyst.innerText = "○ MIDNIGHT AMETHYST DEEP";
+    }
+}
+
 function modifyTextScale(pixelDelta) {
     const nextSize = currentFontSizePixels + pixelDelta;
     if (nextSize < FONT_MIN_BOUNDS || nextSize > FONT_MAX_BOUNDS) return;
@@ -81,7 +106,6 @@ async function bootRevisionEngine() {
         renderSectionBar();
         renderActiveDatabasePayload();
 
-        // Real-time keyword tracker input events listener hook
         document.getElementById('search').addEventListener('input', executeLiveTextHighlighterScanner);
 
     } catch (err) {
@@ -89,6 +113,7 @@ async function bootRevisionEngine() {
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
+
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -122,7 +147,6 @@ function switchCategoryTab(targetTab) {
     currentActiveTab = targetTab;
     currentActiveSection = "All"; 
     
-    // Reset any ongoing highlighted matching loops on category jump
     document.getElementById('search').value = '';
     document.getElementById('search-nav').style.display = 'none';
     capturedHighlightNodes = [];
@@ -150,7 +174,6 @@ function renderActiveDatabasePayload() {
     const cardGrid = document.getElementById('card-grid');
     const blogView = document.getElementById('blog-view');
 
-    // Filter database values purely based on category tab and section index selection rules
     const workspacePool = rawVaultData.filter(item => {
         const matchesTab = (item.tab || item.category) === currentActiveTab;
         const matchesSection = currentActiveSection === 'All' || item.section === currentActiveSection;
@@ -213,16 +236,13 @@ function renderActiveDatabasePayload() {
         }).join('');
     }
     
-    // Apply user selected text scale settings immediately to raw items
     modifyTextScale(0);
 }
 
-// TEXT PARSING HIGHLIGHTER NAVIGATOR MATRIX ENGINE
 function executeLiveTextHighlighterScanner() {
     const query = document.getElementById('search').value.trim().toLowerCase();
     const navDeck = document.getElementById('search-nav');
     
-    // Wipe out any existing active highlight markers before recalculating matching elements
     renderActiveDatabasePayload();
 
     if (!query) {
@@ -232,22 +252,18 @@ function executeLiveTextHighlighterScanner() {
         return;
     }
 
-    // Isolate target containers based on active tab category profile
     const targetTextNodes = document.querySelectorAll('.cmd-name, .syntax-box, .flag-cell-name, .flag-cell-desc, .card-notes, .blog-post h2, .continuous-markdown-body');
     
     targetTextNodes.forEach(node => {
         const originalRawHTML = node.innerHTML;
-        // Escape special regex token values to keep compiling bulletproof
         const safeQueryToken = query.replace(/[-\/\\^\$*+?.()|[\]{}]/g, '\\$&');
         const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
 
         if (originalRawHTML.match(searchRegex)) {
-            // Inject clean styled marker tokens directly across all matching word fragments
             node.innerHTML = originalRawHTML.replace(searchRegex, `<mark class="search-highlight">$1</mark>`);
         }
     });
 
-    // Harvest full matching elements tree from active viewport DOM container
     capturedHighlightNodes = Array.from(document.querySelectorAll('mark.search-highlight'));
     const totalMatchesCount = capturedHighlightNodes.length;
 
@@ -255,7 +271,7 @@ function executeLiveTextHighlighterScanner() {
         activeHighlightIndex = 0;
         navDeck.style.display = 'flex';
         document.getElementById('nav-count').innerText = `1/${totalMatchesCount}`;
-        highlightActiveSelectionTarget(true); // Jump-snap directly to the initial matching node
+        highlightActiveSelectionTarget(true);
     } else {
         navDeck.style.display = 'none';
         capturedHighlightNodes = [];
@@ -266,15 +282,12 @@ function executeLiveTextHighlighterScanner() {
 function shiftHighlightTarget(indexDirectionDelta) {
     if (capturedHighlightNodes.length === 0) return;
 
-    // Clear border indicators and focal highlight styling loops from old item
     highlightActiveSelectionTarget(false);
 
-    // Compute circular index boundary looping mapping variables
     activeHighlightIndex += indexDirectionDelta;
     if (activeHighlightIndex >= capturedHighlightNodes.length) activeHighlightIndex = 0;
     if (activeHighlightIndex < 0) activeHighlightIndex = capturedHighlightNodes.length - 1;
 
-    // Update index trackers display counter metrics text
     document.getElementById('nav-count').innerText = `${activeHighlightIndex + 1}/${capturedHighlightNodes.length}`;
     highlightActiveSelectionTarget(true);
 }
@@ -283,14 +296,12 @@ function highlightActiveSelectionTarget(shouldApplyFocus) {
     const activeTargetNode = capturedHighlightNodes[activeHighlightIndex];
     if (!activeTargetNode) return;
 
-    // Isolate the immediate container item row layout envelope frame box block
     const parentCardEnvelope = activeTargetNode.closest('.glass-card, .blog-post');
 
     if (shouldApplyFocus) {
         activeTargetNode.classList.add('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.add('highlight-focus-ring');
 
-        // Smooth hardware-accelerated viewport alignment jump
         activeTargetNode.scrollIntoView({
             behavior: 'smooth',
             block: 'center'
