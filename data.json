@@ -30,33 +30,6 @@
     "notes": "Hhss"
   },
   {
-    "id": "1792475579688",
-    "tab": "Docker",
-    "layoutMode": "lookup",
-    "section": "General",
-    "command": "Tar",
-    "syntax": "",
-    "flags": [
-      {
-        "flag": "• start, stop, restart, reload, enable, disable",
-        "desc": "Parameter execution enabled."
-      },
-      {
-        "flag": "• Not all services support reload, if it doesnt supoort, you can use restart",
-        "desc": "Parameter execution enabled."
-      },
-      {
-        "flag": "sudo systemctl reboot",
-        "desc": "Parameter execution enabled."
-      },
-      {
-        "flag": "• Restarts your os, equivalent to traditional 'reboot",
-        "desc": "Parameter execution enabled."
-      }
-    ],
-    "notes": "Quick reference."
-  },
-  {
     "id": "1792475696130",
     "tab": "Test2",
     "layoutMode": "concept",
