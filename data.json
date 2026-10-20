@@ -1,20 +1,5 @@
 [
   {
-    "id": "1792473195718",
-    "tab": "Testing",
-    "layoutMode": "lookup",
-    "section": "General",
-    "command": "Tar",
-    "syntax": "Tar -czvf",
-    "flags": [
-      {
-        "flag": "-c",
-        "desc": "working?"
-      }
-    ],
-    "notes": "Files"
-  },
-  {
     "id": "1792473291885",
     "tab": "Git",
     "layoutMode": "lookup",
