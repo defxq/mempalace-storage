@@ -21,5 +21,20 @@
       }
     ],
     "notes": "Yest"
+  },
+  {
+    "id": "1792473981804",
+    "tab": "Shshshs",
+    "layoutMode": "lookup",
+    "section": "General",
+    "command": "T",
+    "syntax": "T",
+    "flags": [
+      {
+        "flag": "-c",
+        "desc": "vzm"
+      }
+    ],
+    "notes": "Hhss"
   }
 ]
