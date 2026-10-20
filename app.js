@@ -1,183 +1,194 @@
 let rawVaultData = [];
-let currentActiveTab = "Linux Core";
+let currentActiveTab = "";
 let currentActiveSection = "All";
 
 async function bootRevisionEngine() {
     try {
-        const response = await fetch('./data.json');
+        // Pull cache-busted database logs via relative pathways
+        const response = await fetch(`./data.json?t=${Date.now()}`);
         rawVaultData = await response.json();
         
+        const cardGrid = document.getElementById('card-grid');
+        const blogView = document.getElementById('blog-view');
+        const tabBar = document.getElementById('tab-bar');
+        const sectionBar = document.getElementById('section-bar');
+
+        // PRISTINE FALLBACK RENDER STRATEGY: Hides standard layout if no data exists
+        if (!rawVaultData || rawVaultData.length === 0) {
+            tabBar.innerHTML = '';
+            sectionBar.innerHTML = '';
+            cardGrid.innerHTML = `
+                <div class="empty-notice" style="grid-column: 1 / -1; width: 100%;">
+                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
+                </div>
+            `;
+            blogView.innerHTML = `
+                <div class="empty-notice">
+                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
+                </div>
+            `;
+            blogView.style.display = 'block';
+            return;
+        }
+
+        // Gather unique categories from database objects safely
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
-        const fixedTabs = extractedTabs.length > 0 ? extractedTabs : ["Linux Core", "Networking", "Git Mechanics", "Git Deep Theory"];
         
-        renderTabMenu(fixedTabs);
-        buildSubSectionMenu();
-        applyFilters();
+        if (extractedTabs.length === 0) {
+            tabBar.innerHTML = '';
+            sectionBar.innerHTML = '';
+            cardGrid.innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
+            return;
+        }
+
+        // Fallback default state protection rule
+        if (!currentActiveTab || !extractedTabs.includes(currentActiveTab)) {
+            currentActiveTab = extractedTabs[0];
+        }
+
+        renderTabBar(extractedTabs);
+        renderSectionBar();
+        renderActiveDatabasePayload();
+
+        // Bind interactive real-time typing query hooks
+        document.getElementById('search').addEventListener('input', renderActiveDatabasePayload);
+
     } catch (err) {
-        document.getElementById('card-grid').innerHTML = `<p style="color:var(--neon-pink); padding:20px;">Failed to parse data.json repository vault elements.</p>`;
+        console.error("Vault fetching exception: ", err.message);
+        document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
 
-function renderTabMenu(tabs) {
+function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
-    tabBar.innerHTML = '';
-    tabs.forEach(tabName => {
-        const btn = document.createElement('button');
-        btn.className = `tab-btn ${tabName === currentActiveTab ? 'active' : ''}`;
-        btn.textContent = tabName;
-        btn.onclick = () => {
-            currentActiveTab = tabName;
-            currentActiveSection = "All"; 
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            buildSubSectionMenu();
-            applyFilters();
-        };
-        tabBar.appendChild(btn);
-    });
+    tabBar.innerHTML = tabs.map(tab => `
+        <button type="button" class="tab-btn ${tab === currentActiveTab ? 'active' : ''}" onclick="switchCategoryTab('${tab.replace(/'/g, "\\'")}')">
+            ${tab}
+        </button>
+    `).join('');
 }
 
-function buildSubSectionMenu() {
+function renderSectionBar() {
     const sectionBar = document.getElementById('section-bar');
-    sectionBar.innerHTML = '';
+    
+    // Filter down array listings based on current selected tab to harvest child keys
+    const relatedItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
+    const uniqueSections = [...new Set(relatedItems.map(item => item.section))].filter(Boolean);
 
-    const activeTabItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
-    const sections = [...new Set(activeTabItems.map(item => item.section || 'General'))];
+    if (uniqueSections.length === 0) {
+        sectionBar.innerHTML = '';
+        return;
+    }
 
-    const allBtn = document.createElement('span');
-    allBtn.className = `section-link ${currentActiveSection === 'All' ? 'active' : ''}`;
-    allBtn.textContent = "[ SHOW ALL ]";
-    allBtn.onclick = () => {
-        currentActiveSection = "All";
-        document.querySelectorAll('.section-link').forEach(l => l.classList.remove('active'));
-        allBtn.classList.add('active');
-        applyFilters();
-    };
-    sectionBar.appendChild(allBtn);
+    let sectionButtonsHTML = `<span class="section-link ${currentActiveSection === 'All' ? 'active' : ''}" onclick="switchSubSection('All')">ALL</span>`;
+    
+    sectionButtonsHTML += uniqueSections.map(sec => `
+        <span class="section-link ${currentActiveSection === sec ? 'active' : ''}" onclick="switchSubSection('${sec.replace(/'/g, "\\'")}')">
+            ${sec.toUpperCase()}
+        </span>
+    `).join('');
 
-    sections.forEach(secName => {
-        const link = document.createElement('span');
-        link.className = `section-link ${currentActiveSection === secName ? 'active' : ''}`;
-        link.textContent = `# ${secName}`;
-        link.onclick = () => {
-            currentActiveSection = secName;
-            document.querySelectorAll('.section-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            applyFilters();
-
-            // FIXED MOBILE SCROLL ANCHOR LOGIC ROUTINE:
-            // Instead of firing global scrollIntoView which breaks mobile page frames,
-            // we calculate the relative offset position strictly inside the scroll container.
-            const isContinuousBlog = activeTabItems.some(item => item.layoutMode === 'concept') || currentActiveTab.includes('Theory');
-            if (isContinuousBlog) {
-                const scrollContainer = document.getElementById('main-scroll-container');
-                const targetElement = document.getElementById(`anchor-${secName}`);
-                
-                if (scrollContainer && targetElement) {
-                    // Compute distance of the element relative to the top of the container scroll viewport
-                    const targetOffsetTop = targetElement.offsetTop - scrollContainer.offsetTop;
-                    scrollContainer.scrollTo({
-                        top: targetOffsetTop,
-                        behavior: 'smooth'
-                    });
-                }
-            }
-        };
-        sectionBar.appendChild(link);
-    });
+    sectionBar.innerHTML = sectionButtonsHTML;
 }
 
-function highlightPlaceholders(text) {
-    if (!text) return "";
-    return text.replace(/(\[[^\]]+\])/g, '<span class="placeholder">\$1</span>');
+function switchCategoryTab(targetTab) {
+    currentActiveTab = targetTab;
+    currentActiveSection = "All"; // Reset sub anchor navigation values on primary change
+    
+    const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
+    renderTabBar(extractedTabs);
+    renderSectionBar();
+    renderActiveDatabasePayload();
 }
 
-function applyFilters() {
-    const searchString = document.getElementById('search').value.toLowerCase();
+function switchSubSection(targetSection) {
+    currentActiveSection = targetSection;
+    renderSectionBar();
+    renderActiveDatabasePayload();
+}
+
+function renderActiveDatabasePayload() {
     const cardGrid = document.getElementById('card-grid');
     const blogView = document.getElementById('blog-view');
+    const searchQuery = document.getElementById('search').value.toLowerCase();
 
-    const tabFilteredItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
-    const modeIsBlog = tabFilteredItems.some(item => item.layoutMode === 'concept') || currentActiveTab.includes('Theory');
+    // Filter database array variables down to match tab, section, and typing parameters
+    const workspacePool = rawVaultData.filter(item => {
+        const matchesTab = (item.tab || item.category) === currentActiveTab;
+        const matchesSection = currentActiveSection === 'All' || item.section === currentActiveSection;
+        
+        const cmdLower = (item.command || '').toLowerCase();
+        const synLower = (item.syntax || '').toLowerCase();
+        const notesLower = (item.notes || '').toLowerCase();
+        const titleLower = (item.title || '').toLowerCase();
+        const contentLower = (item.content || '').toLowerCase();
+        
+        const matchesSearch = cmdLower.includes(searchQuery) || 
+                              synLower.includes(searchQuery) || 
+                              notesLower.includes(searchQuery) ||
+                              titleLower.includes(searchQuery) ||
+                              contentLower.includes(searchQuery);
 
-    if (modeIsBlog) {
-        cardGrid.style.display = "none";
-        blogView.style.display = "block";
-        blogView.innerHTML = '';
+        return matchesTab && matchesSection && matchesSearch;
+    });
 
-        const filteredBlogStack = tabFilteredItems.filter(item => {
-            const matchesSection = currentActiveSection === "All" || (item.section || 'General') === currentActiveSection;
-            const matchesSearch = item.title?.toLowerCase().includes(searchString) || item.content?.toLowerCase().includes(searchString);
-            return matchesSection && matchesSearch;
-        });
+    // Check if the current context profile consists of Card Matrices or Blogs
+    const representSample = rawVaultData.find(item => (item.tab || item.category) === currentActiveTab);
+    const isBlogTrack = representSample && (representSample.layoutMode === 'concept' || representSample.title);
 
-        filteredBlogStack.forEach(item => {
-            const article = document.createElement('article');
-            article.className = 'blog-post';
-            article.id = `anchor-${item.section || 'General'}`;
-            
-            let processedContent = item.content || "";
-            if (!processedContent.includes('<p>') && !processedContent.includes('<br>')) {
-                processedContent = processedContent
-                    .split('\n\n')
-                    .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-                    .join('');
+    if (isBlogTrack) {
+        cardGrid.style.display = 'none';
+        blogView.style.display = 'block';
+
+        if (workspacePool.length === 0) {
+            blogView.innerHTML = `<p style="color:var(--text-main); font-style:italic; padding:12px;">No documentation steps found matching parameters.</p>`;
+            return;
+        }
+
+        blogView.innerHTML = workspacePool.map(item => `
+            <div class="blog-post">
+                <h2>${item.title || 'Untitled Segment Log'}</h2>
+                <div class="continuous-markdown-body">${item.content || ''}</div>
+            </div>
+        `).join('');
+
+    } else {
+        blogView.style.display = 'none';
+        cardGrid.style.display = 'grid';
+
+        if (workspacePool.length === 0) {
+            cardGrid.innerHTML = `<p style="grid-column: 1 / -1; color:var(--text-main); font-style:italic; padding:12px;">No CLI parameter matrices match parameters.</p>`;
+            return;
+        }
+
+        cardGrid.innerHTML = workspacePool.map(item => {
+            let cardHTML = `
+                <div class="glass-card">
+                    <div class="cmd-name">${item.command || 'Generic'}</div>
+                    <div class="syntax-box">${item.syntax || ''}</div>
+            `;
+
+            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
+                cardHTML += `<table class="flag-table">`;
+                item.flags.forEach(f => {
+                    cardHTML += `
+                        <tr class="flag-row">
+                            <td class="flag-cell-name">${f.flag}</td>
+                            <td class="flag-cell-desc">${f.desc}</td>
+                        </tr>`;
+                });
+                cardHTML += `</table>`;
             }
 
-            article.innerHTML = `
-                <h2>${item.title}</h2>
-                <div>${processedContent}</div>
-            `;
-            blogView.appendChild(article);
-        });
-    } else {
-        cardGrid.style.display = "grid";
-        blogView.style.display = "none";
-        cardGrid.innerHTML = '';
+            if (item.notes) {
+                cardHTML += `<div class="card-notes">↳ ${item.notes}</div>`;
+            }
 
-        const filteredCardStack = tabFilteredItems.filter(item => {
-            const matchesSection = currentActiveSection === "All" || (item.section || 'General') === currentActiveSection;
-            const matchesSearch = item.command?.toLowerCase().includes(searchString) || 
-                                  item.syntax?.toLowerCase().includes(searchString) || 
-                                  item.notes?.toLowerCase().includes(searchString) ||
-                                  item.flags?.some(f => f.flag.toLowerCase().includes(searchString) || f.desc.toLowerCase().includes(searchString));
-            return matchesSection && matchesSearch;
-        });
-
-        filteredCardStack.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'glass-card';
-            
-            let flagsHTML = '<table class="flag-table">';
-            item.flags?.forEach(f => {
-                flagsHTML += `
-                    <tr class="flag-row">
-                        <td class="flag-cell-name">${f.flag}</td>
-                        <td class="flag-cell-desc">${highlightPlaceholders(f.desc)}</td>
-                    </tr>
-                `;
-            });
-            flagsHTML += '</table>';
-
-            card.innerHTML = `
-                <div class="cmd-name">${item.command}</div>
-                <div class="syntax-box">${highlightPlaceholders(item.syntax)}</div>
-                ${flagsHTML}
-                <div class="card-notes">${item.notes}</div>
-            `;
-            cardGrid.appendChild(card);
-        });
+            cardHTML += `</div>`;
+            return cardHTML;
+        }).join('');
     }
 }
 
-window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== document.getElementById('search')) {
-        e.preventDefault();
-        document.getElementById('search').focus();
-        document.getElementById('search').select();
-    }
-});
-
-document.getElementById('search').addEventListener('input', applyFilters);
-bootRevisionEngine();
+// Initialise execution on content boot load loops
+window.addEventListener('DOMContentLoaded', bootRevisionEngine);
