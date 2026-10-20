@@ -4,7 +4,7 @@
     "tab": "Docker1",
     "layoutMode": "lookup",
     "section": "General",
-    "command": "Tar",
+    "command": "Terry get over here",
     "syntax": "Tar -czvf",
     "flags": [
       {
