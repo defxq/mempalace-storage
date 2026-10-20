@@ -1,13 +1,5 @@
 [
   {
-    "id": "1792427274884",
-    "tab": "test cat",
-    "layoutMode": "concept",
-    "section": "test General",
-    "title": "test artcle",
-    "content": "<span class=\"code-inline\">test</span>\n<div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(`test`); alert('Command snippet captured to clipboard!')\"><pre><code>test</code></pre></div>\ntest"
-  },
-  {
     "id": "1792427364887",
     "tab": "git",
     "layoutMode": "concept",
