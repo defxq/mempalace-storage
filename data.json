@@ -1,10 +1,1 @@
-[
-  {
-    "id": "1792427609625",
-    "tab": "git",
-    "layoutMode": "concept",
-    "section": "partitioning",
-    "title": "article workflow title",
-    "content": "1. Git sees your credential.helper is blank\n2. So it prompts you username(your github's username) and password(enter PAT)\n3. Git holds onto this in RAM\n4. Git includes the token in the https header of the code you push\n5. Git erases your entered credentials as soon as it is done using to upload.\n\nTo cache your credentials, you can use \ngit-credential-cache--daemon.\n\ngit config --global credential.helper 'cache --timeout=3600'\n\n(3600 seconds for 1 hour)\nThis cmd updates ~/.gitconfig, and helps cache your credentials\n\n1. After entering your credentials, Instead of erasing the token instantly, Git triggers the daemon to start running.\n2. This process holds onto your credentials and starts a countdown timer.\n3. If you run another Git command before the timer hits zero, Git grabs the token from RAM silently, runs the command, and resets the timer back to your maximum duration.\n4. If you don't run any \n"
-  }
-]
+[]
