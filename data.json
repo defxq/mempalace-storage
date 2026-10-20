@@ -78,5 +78,20 @@
     "section": "General2",
     "title": "Titled log entry",
     "content": "Blog1"
+  },
+  {
+    "id": "1792476520945",
+    "tab": "Test2",
+    "layoutMode": "lookup",
+    "section": "General",
+    "command": "Base",
+    "syntax": "Baee",
+    "flags": [
+      {
+        "flag": "Beee",
+        "desc": "bee"
+      }
+    ],
+    "notes": "None"
   }
 ]
