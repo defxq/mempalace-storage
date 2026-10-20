@@ -8,25 +8,6 @@
     "content": "git ls-remote\n• requires repo url as arg but can be used in a git initialized directory which have added the git repo url with \"git remote add origin <repo url>\" to use that url as default arg\ngit ls-remote <repo url.git>\n• if the repo url is public, it'll print the results and wont need any credentials to provide. \n• If the repo url is private, it'll check your credential helper in ~/.gitconfig. and if not configured(blank), it'll ask for your credentials.\n===============================\ngit config --global credential.helper \n\nIf it says libsecret, it uses gnome keyring, cache means git-credential-cache--daemon,\nstore means plain text file(~/.git-credential),\nif its empty, you havent set it up yet, else, just search it up. \n===============================\nDepending on the repo url you provide, Git decides whether to use credential helper or ssh. If you provide SSH url, it'll ignore the credential helper and only look for ssh.\n\nTo turn https url which uses PAT to ssh, you can either get the ssh url from the desktop web page or manually convert it:\nHttps url: https:// github . com/user/repo\nSSH url: git@github . com:user/repo.git\n\n# the .git suffix\nHistorically, git strictly required '.git' suffix at the end, but modern git is smart and handles https flexibly, but SSH might still need the .git suffix.\n===============================\nUnderstanding PAT in git\n===============================\nPassword managers varies:\n\nmacOS uses Keychain Access.\nWindows uses Windows Credential Manager.\nGnome desktop uses gnome keyring.\nKDE desktop uses Kwallet.\n===============================\nYou type git push -\n===============================\nIn gnome desktops\n1. Git looks at your global config,  sees credential.helper=manager (which points to GitHub's GCM) and asks GCM for your password.\n2. GNOME Keyring decrypts and hands your PAT to GCM via libsecret.\n3. GCM hands it back to Git.\n4. Git includes the token in the https header of the code you push.\n===============================\nIn a headless server(desktopless)\n1. Git sees your credential.helper is blank\n2. So it prompts you username(your github's username) and password(enter PAT)\n3. Git holds onto this in RAM\n4. Git includes the token in the https header of the code you push\n5. Git erases your entered credentials as soon as it is done using to upload.\n\nTo cache your credentials, you can use \ngit-credential-cache--daemon.\n\ngit config --global credential.helper 'cache --timeout=3600'\n\n(3600 seconds for 1 hour)\nThis cmd updates ~/.gitconfig, and helps cache your credentials\n\n1. After entering your credentials, Instead of erasing the token instantly, Git triggers the daemon to start running.\n2. This process holds onto your credentials and starts a countdown timer.\n3. If you run another Git command before the timer hits zero, Git grabs the token from RAM silently, runs the command, and resets the timer back to your maximum duration.\n4. If you don't run any Git commands and the timer expires, the daemon terminates along with the credentials.\n"
   },
   {
-    "id": "1792427501022",
-    "tab": "flashy",
-    "layoutMode": "lookup",
-    "section": "flash skip",
-    "command": "tar",
-    "syntax": "tar -czvf",
-    "flags": [
-      {
-        "flag": "-c",
-        "desc": "create"
-      },
-      {
-        "flag": "-f",
-        "desc": "fuck"
-      }
-    ],
-    "notes": "excellent"
-  },
-  {
     "id": "1792427568949",
     "tab": "git",
     "layoutMode": "concept",
