@@ -1,13 +1,5 @@
 [
   {
-    "id": "1792472336319",
-    "tab": "Linux",
-    "layoutMode": "concept",
-    "section": "Audi car",
-    "title": "Basic",
-    "content": "Test"
-  },
-  {
     "id": "1792473195718",
     "tab": "Testing",
     "layoutMode": "lookup",
