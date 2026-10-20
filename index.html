@@ -36,7 +36,7 @@
             margin: 0; padding: 0; 
             background: var(--bg);
             color: var(--text-main); 
-            font-size: 13px; 
+            font-size: 17px; /* Default size locked to 17px */
             height: 100vh;
             height: 100dvh; 
             display: flex;
@@ -134,7 +134,7 @@
 
         .empty-notice { display: flex; align-items: center; justify-content: center; height: 200px; border: 1px dashed var(--border); border-radius: 6px; background: var(--surface); color: var(--text-main); font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* TOUCH-SAFE COCKPIT SETTINGS SLIDE DRAWER SIDEBAR */
+        /* TOUCH-SAFE DRAWER SETUP */
         .sidebar-drawer {
             position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
             background: var(--surface); border-left: 1px solid var(--border);
@@ -144,7 +144,7 @@
         }
         .sidebar-drawer.open-pane { right: 0; }
         
-        /* BACKDROP MASK FIXED CLOSURE TRIGGER: Handles clicking outside menu spaces cleanly */
+        /* CLICKABLE BACKDROP LAYER CLICK MASK */
         .sidebar-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
             z-index: 990; display: none; transition: opacity 0.2s; opacity: 0;
@@ -154,7 +154,6 @@
         .drawer-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
         .drawer-title { font-size: 11px; font-weight: bold; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
         
-        /* HARDWARE CANCEL CROSS ELEMENT CLOSER TEXT TRIGGER */
         .close-x-btn { background: none; border: none; color: var(--accent-pink); font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
         .close-x-btn:active { background: rgba(244,63,94,0.1); }
 
@@ -187,7 +186,6 @@
     <div id="settings-drawer" class="sidebar-drawer">
         <div class="drawer-header">
             <div class="drawer-title">⚙️ CONFIGURATION PANEL</div>
-            <!-- NATIVE PHYSICAL CANCEL BTN LAYER BUTTON LINK CHANNELS -->
             <button type="button" class="close-x-btn" onclick="toggleSidebarMenu(false)">✕ CLOSE</button>
         </div>
         
@@ -195,12 +193,11 @@
             <div class="config-label">Workspace Font Scaling:</div>
             <div class="font-scaler-deck">
                 <button type="button" class="scaler-btn" onclick="modifyTextScale(-1)">-</button>
-                <div id="scaler-indicator" class="scaler-value-display">13px</div>
+                <div id="scaler-indicator" class="scaler-value-display">17px</div>
                 <button type="button" class="scaler-btn" onclick="modifyTextScale(1)">+</button>
             </div>
         </div>
 
-        <!-- NEW COMPONENT THEME DECK OPTIONS SELECTOR CONTROLLERS -->
         <div class="config-row">
             <div class="config-label">Visual Interface Theme:</div>
             <div class="theme-select-deck">
