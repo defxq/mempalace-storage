@@ -1,13 +1,5 @@
 [
   {
-    "id": "1792427028771",
-    "tab": "test",
-    "layoutMode": "concept",
-    "section": "General",
-    "title": "test",
-    "content": "<span class=\"code-inline\">test</span>\n<div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(`test`); alert('Command snippet captured to clipboard!')\"><pre><code>test</code></pre></div>\ntest"
-  },
-  {
     "id": "1792427274884",
     "tab": "test cat",
     "layoutMode": "concept",
