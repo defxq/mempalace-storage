@@ -78,13 +78,5 @@
     "section": "General2",
     "title": "Titled log entry",
     "content": "Blog1\n===============================\nSystemd\n===============================\n================\nSystemd\n============================="
-  },
-  {
-    "id": "1792476586476",
-    "tab": "Docker1",
-    "layoutMode": "concept",
-    "section": "General",
-    "title": "Deep",
-    "content": "Haha"
   }
 ]
