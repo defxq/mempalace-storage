@@ -1,17 +1,1 @@
-[
-  {
-    "id": "1792473291885",
-    "tab": "Git",
-    "layoutMode": "lookup",
-    "section": "General",
-    "command": "Tar",
-    "syntax": "Tar",
-    "flags": [
-      {
-        "flag": "Haha",
-        "desc": "Parameter execution enabled."
-      }
-    ],
-    "notes": "Haha"
-  }
-]
+[]
