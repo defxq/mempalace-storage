@@ -2,48 +2,18 @@ let rawVaultData = [];
 let currentActiveTab = "";
 let currentActiveSection = "All";
 
-// SIDEBAR ACCESSIBILITY SCALING MANAGEMENT STATE
-let currentFontSizePixels = 13;
+// FIXED DEFAULT FONT SCALING VALUE: Changed from 13px to 17px as requested
+let currentFontSizePixels = 17;
 const FONT_MIN_BOUNDS = 10;
 const FONT_MAX_BOUNDS = 22;
 
-// TEXT HIGHLIGHT TRACKER TARGET STATE METRICS
 let capturedHighlightNodes = [];
 let activeHighlightIndex = -1;
 
-// FIXED MENU SLIDER DISPATCHER: Safely toggles state classes alongside masking layers
 function toggleSidebarMenu(shouldOpen) {
     const drawer = document.getElementById('settings-drawer');
-    const overlay = document.getElementById('drawer-overlay');
-    
-    if (shouldOpen) {
-        drawer.classList.add('open-pane');
-        overlay.classList.add('open-pane');
-    } else {
-        drawer.classList.remove('open-pane');
-        overlay.classList.remove('open-pane');
-    }
-}
-
-// THEME SELECTION MATRIX ROUTINE
-function switchActiveThemeSheet(themeId) {
-    const bodyNode = document.body;
-    const btnIndustrial = document.getElementById('theme-btn-industrial');
-    const btnAmethyst = document.getElementById('theme-btn-amethyst');
-
-    if (themeId === 'amethyst') {
-        bodyNode.classList.add('theme-amethyst');
-        btnAmethyst.classList.add('active-theme-token');
-        btnIndustrial.classList.remove('active-theme-token');
-        btnAmethyst.innerText = "● MIDNIGHT AMETHYST DEEP";
-        btnIndustrial.innerText = "○ INDUSTRIAL GITHUB DARK";
-    } else {
-        bodyNode.classList.remove('theme-amethyst');
-        btnIndustrial.classList.add('active-theme-token');
-        btnAmethyst.classList.remove('active-theme-token');
-        btnIndustrial.innerText = "● INDUSTRIAL GITHUB DARK";
-        btnAmethyst.innerText = "○ MIDNIGHT AMETHYST DEEP";
-    }
+    if (shouldOpen) drawer.classList.add('open-pane');
+    else drawer.classList.remove('open-pane');
 }
 
 function modifyTextScale(pixelDelta) {
@@ -61,6 +31,31 @@ function modifyTextScale(pixelDelta) {
     });
 }
 
+// HELPER FUNCTION: Parses links live to extract YouTube video tokens or images
+function renderMediaAttachment(url) {
+    if (!url || url.trim() === '') return '';
+    const cleanUrl = url.trim();
+
+    // Check for YouTube standard or shortened URLs
+    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+    const ytMatch = cleanUrl.match(ytRegex);
+
+    if (ytMatch && ytMatch[1]) {
+        return `
+            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:4px; border:1px solid var(--border); margin:8px 0; background:var(--code-bg);">
+                <iframe src="https://youtube.com{ytMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+        `;
+    }
+
+    // Default Fallback: Assume it's a standard image link asset
+    return `
+        <div style="margin:8px 0; border-radius:4px; overflow:hidden; border:1px solid var(--border); background:var(--code-bg);">
+            <img src="${cleanUrl}" alt="Attached Resource" style="width:100%; height:auto; display:block; object-fit:contain; max-height:300px;" onerror="this.parentElement.style.display='none';" />
+        </div>
+    `;
+}
+
 async function bootRevisionEngine() {
     try {
         const response = await fetch(`./data.json?t=${Date.now()}`);
@@ -73,27 +68,13 @@ async function bootRevisionEngine() {
         const sectionBar = document.getElementById('section-bar');
 
         if (!rawVaultData || rawVaultData.length === 0) {
-            tabBar.innerHTML = '';
-            sectionBar.innerHTML = '';
-            cardGrid.innerHTML = `
-                <div class="empty-notice" style="grid-column: 1 / -1; width: 100%;">
-                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
-                </div>
-            `;
-            blogView.innerHTML = `
-                <div class="empty-notice">
-                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
-                </div>
-            `;
-            blogView.style.display = 'block';
+            tabBar.innerHTML = ''; sectionBar.innerHTML = '';
+            cardGrid.innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
             return;
         }
 
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
-        
         if (extractedTabs.length === 0) {
-            tabBar.innerHTML = '';
-            sectionBar.innerHTML = '';
             cardGrid.innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
             return;
         }
@@ -109,11 +90,9 @@ async function bootRevisionEngine() {
         document.getElementById('search').addEventListener('input', executeLiveTextHighlighterScanner);
 
     } catch (err) {
-        console.error("Vault fetching exception: ", err.message);
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
     }
 }
-
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -134,9 +113,11 @@ function renderSectionBar() {
     }
 
     let sectionButtonsHTML = `<span class="section-link ${currentActiveSection === 'All' ? 'active' : ''}" onclick="switchSubSection('All')">ALL</span>`;
+    
+    // FIXED: Stripped .toUpperCase() out entirely to keep subsection names exactly case-preserving as written in your database payload
     sectionButtonsHTML += uniqueSections.map(sec => `
         <span class="section-link ${currentActiveSection === sec ? 'active' : ''}" onclick="switchSubSection('${sec.replace(/'/g, "\\'")}')">
-            ${sec.toUpperCase()}
+            ${sec}
         </span>
     `).join('');
 
@@ -196,6 +177,7 @@ function renderActiveDatabasePayload() {
             <div class="blog-post">
                 <h2>${item.title || 'Untitled Segment Log'}</h2>
                 <p class="continuous-markdown-body">${item.content || ''}</p>
+                ${item.mediaUrl ? renderMediaAttachment(item.mediaUrl) : ''}
             </div>
         `).join('');
 
@@ -215,7 +197,8 @@ function renderActiveDatabasePayload() {
                     <div class="syntax-box">${item.syntax || ''}</div>
             `;
 
-            if (item.flags && item.flags.length > 0 && item.flags.flag !== "Default") {
+            // FIXED: Only render flag block if flags array exists and actually holds valid item mappings (hides dummy 'Default' cards layout strings)
+            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
                 cardHTML += `<table class="flag-table">`;
                 item.flags.forEach(f => {
                     cardHTML += `
@@ -227,8 +210,14 @@ function renderActiveDatabasePayload() {
                 cardHTML += `</table>`;
             }
 
-            if (item.notes) {
+            // FIXED: Only inject notes footer if a custom string message was explicitly typed out into the card entry
+            if (item.notes && item.notes.trim() !== "") {
                 cardHTML += `<div class="card-notes">↳ ${item.notes}</div>`;
+            }
+
+            // Append optional media blocks inside command layout grids if reference strings exist
+            if (item.mediaUrl) {
+                cardHTML += renderMediaAttachment(item.mediaUrl);
             }
 
             cardHTML += `</div>`;
@@ -236,9 +225,14 @@ function renderActiveDatabasePayload() {
         }).join('');
     }
     
-    modifyTextScale(0);
+    // Apply default font settings parameter directly over the drawn DOM elements canvas template layout
+    document.getElementById('scaler-indicator').innerText = `${currentFontSizePixels}px`;
+    document.body.style.fontSize = `${currentFontSizePixels}px`;
+    const elementsToScale = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body, .blog-post p, .flag-cell-name, .flag-cell-desc, .card-notes');
+    elementsToScale.forEach(block => {
+        block.style.fontSize = `${currentFontSizePixels - 1}px`;
+    });
 }
-
 function executeLiveTextHighlighterScanner() {
     const query = document.getElementById('search').value.trim().toLowerCase();
     const navDeck = document.getElementById('search-nav');
@@ -281,7 +275,6 @@ function executeLiveTextHighlighterScanner() {
 
 function shiftHighlightTarget(indexDirectionDelta) {
     if (capturedHighlightNodes.length === 0) return;
-
     highlightActiveSelectionTarget(false);
 
     activeHighlightIndex += indexDirectionDelta;
