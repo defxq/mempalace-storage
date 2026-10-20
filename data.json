@@ -1,13 +1,5 @@
 [
   {
-    "id": "1792473863747",
-    "tab": "Docker",
-    "layoutMode": "concept",
-    "section": "General",
-    "title": "Deep",
-    "content": "Write logs"
-  },
-  {
     "id": "1792473904423",
     "tab": "Docker1",
     "layoutMode": "lookup",
