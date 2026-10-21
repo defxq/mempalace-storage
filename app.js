@@ -25,22 +25,36 @@ function switchActiveThemeSheet(themeId) {
     const bodyNode = document.body;
     const btnIndustrial = document.getElementById('theme-btn-industrial');
     const btnAmethyst = document.getElementById('theme-btn-amethyst');
+    const btnMatrix = document.getElementById('theme-btn-matrix');
+
+    // Wipe previous theme classes completely to protect core variables
+    bodyNode.classList.remove('theme-amethyst', 'theme-matrix');
+    btnIndustrial.classList.remove('active-theme-token');
+    btnAmethyst.classList.remove('active-theme-token');
+    btnMatrix.classList.remove('active-theme-token');
 
     if (themeId === 'amethyst') {
         bodyNode.classList.add('theme-amethyst');
         btnAmethyst.classList.add('active-theme-token');
-        btnIndustrial.classList.remove('active-theme-token');
-        btnAmethyst.innerText = "● MIDNIGHT AMETHYST AXIS";
         btnIndustrial.innerText = "○ INDUSTRIAL CYAN TERMINAL";
+        btnAmethyst.innerText = "● MIDNIGHT AMETHYST AXIS";
+        btnMatrix.innerText = "○ MATRIX REVOLUTION CODE";
+    } else if (themeId === 'matrix') {
+        bodyNode.classList.add('theme-matrix');
+        btnMatrix.classList.add('active-theme-token');
+        btnIndustrial.innerText = "○ INDUSTRIAL CYAN TERMINAL";
+        btnAmethyst.innerText = "○ MIDNIGHT AMETHYST AXIS";
+        btnMatrix.innerText = "● MATRIX REVOLUTION CODE";
     } else {
-        bodyNode.classList.remove('theme-amethyst');
         btnIndustrial.classList.add('active-theme-token');
-        btnAmethyst.classList.remove('active-theme-token');
         btnIndustrial.innerText = "● INDUSTRIAL CYAN TERMINAL";
         btnAmethyst.innerText = "○ MIDNIGHT AMETHYST AXIS";
+        btnMatrix.innerText = "○ MATRIX REVOLUTION CODE";
     }
-    executeLiveTextHighlighterScanner(); 
+    
+    executeLiveTextHighlighterScanner(); // Forces instant high-contrast selection updates
 }
+
 
 function modifyTextScale(pixelDelta) {
     const nextSize = currentFontSizePixels + pixelDelta;

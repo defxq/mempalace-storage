@@ -1,3 +1,15 @@
+/* 🧪 PRECISION NEW EXTRA VIEWPORT THEME OVERLAY: MATRIX REVOLUTION */
+body.theme-matrix {
+    --bg-void: #020402;
+    --surface: #060c06;
+    --border: #103a10;
+    --terminal-screen: #020402;
+    --text-bright: #99ff99;
+    --text-pure: #ffffff;
+    --text-muted: #1b4d1b;
+    --glow-cyan: #00ff33;
+    --glow-cyan-alpha: rgba(0, 255, 51, 0.12);
+}
 /* 90s Cyberpunk Matte Obsidian Spec Palette (SAO Menu Blue-Shift Theme) */
 :root {
     --bg-void: #050608;
@@ -10,18 +22,6 @@
     --glow-cyan: #00f0ff;
     --glow-cyan-alpha: rgba(0, 240, 255, 0.1);
     --retro-alert: #ff3366;
-}
-/* 🧪 PRECISION NEW EXTRA VIEWPORT THEME OVERLAY: MATRIX REVOLUTION */
-body.theme-matrix {
-    --bg-void: #020402;
-    --surface: #060c06;
-    --border: #103a10;
-    --terminal-screen: #020402;
-    --text-bright: #99ff99;
-    --text-pure: #ffffff;
-    --text-muted: #1b4d1b;
-    --glow-cyan: #00ff33;
-    --glow-cyan-alpha: rgba(0, 255, 51, 0.12);
 }
 
 body.theme-amethyst {
