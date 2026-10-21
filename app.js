@@ -67,13 +67,13 @@ async function bootRevisionEngine() {
 
         if (!rawVaultData || rawVaultData.length === 0) {
             tabBar.innerHTML = ''; sectionBar.innerHTML = '';
-            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty..</div>`;
             return;
         }
 
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab).filter(Boolean))];
         if (extractedTabs.length === 0) {
-            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty..</div>`;
             return;
         }
 
@@ -99,7 +99,7 @@ async function bootRevisionEngine() {
         }, true); // Setting 'true' forces execution ahead of native system defaults
 
     } catch (err) {
-        document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM DIRECTORY PREFETCH METRIC COLLISION INTERRUPT]</div>`;
+        document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty...</div>`;
     }
 }
 
