@@ -67,13 +67,13 @@ async function bootRevisionEngine() {
 
         if (!rawVaultData || rawVaultData.length === 0) {
             tabBar.innerHTML = ''; sectionBar.innerHTML = '';
-            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty..</div>`;
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty...</div>`;
             return;
         }
 
         const extractedTabs = [...new Set(rawVaultData.map(item => item.tab).filter(Boolean))];
         if (extractedTabs.length === 0) {
-            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty..</div>`;
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty...</div>`;
             return;
         }
 
@@ -87,7 +87,6 @@ async function bootRevisionEngine() {
 
         document.getElementById('search').addEventListener('input', executeLiveTextHighlighterScanner);
         
-        // FIXED GLOBAL SHORTCUT INTERCEPT: Completely captures the event phase to secure form focus
         document.addEventListener('keydown', (e) => {
             const searchInput = document.getElementById('search');
             if (e.key === '/' && document.activeElement !== searchInput) {
@@ -96,7 +95,7 @@ async function bootRevisionEngine() {
                 searchInput.focus();
                 searchInput.select();
             }
-        }, true); // Setting 'true' forces execution ahead of native system defaults
+        }, true);
 
     } catch (err) {
         document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty...</div>`;
@@ -156,7 +155,7 @@ function renderActiveDatabasePayload() {
     });
 
     if (workspacePool.length === 0) {
-        cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[NO VAULT OBJECT RECORDS DISCOVERED INSIDE TARGET MATRIX]</div>`;
+        cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">Data is empty...</div>`;
         return;
     }
 
@@ -174,6 +173,7 @@ function renderActiveDatabasePayload() {
     modifyTextScale(0);
 }
 
+// FIXED: Advanced highlighter that uses node child loops to skip background HTML code blocks entirely
 function executeLiveTextHighlighterScanner() {
     const query = document.getElementById('search').value.trim().toLowerCase();
     const navDeck = document.getElementById('search-nav');
@@ -186,16 +186,37 @@ function executeLiveTextHighlighterScanner() {
         return;
     }
 
-    const targetTextNodes = document.querySelectorAll('.card-title-header, .card-content-body, .card-section-tag');
-    
-    targetTextNodes.forEach(node => {
-        let originalRawHTML = node.innerHTML;
-        const safeQueryToken = query.replace(/[-\/\\^\$*+?.()|[\]{}]/g, '\\$&');
-        const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
+    const targetContainers = document.querySelectorAll('.card-title-header, .card-content-body, .card-section-tag');
+    const safeQueryToken = query.replace(/[-\/\\^\$*+?.()|[\]{}]/g, '\\$&');
+    const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
 
-        if (originalRawHTML.match(searchRegex)) {
-            node.innerHTML = originalRawHTML.replace(searchRegex, `<mark class="search-highlight">$1</mark>`);
-        }
+    targetContainers.forEach(container => {
+        // Recursive text-only parser skips hidden attributes and macros entirely
+        const walkAndHighlightNode = (element) => {
+            let childNodesArray = Array.from(element.childNodes);
+            
+            childNodesArray.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    const textValue = child.nodeValue;
+                    if (textValue.match(searchRegex)) {
+                        const tempSpanWrapper = document.createElement('span');
+                        tempSpanWrapper.innerHTML = textValue.replace(searchRegex, `<mark class="search-highlight">$1</mark>`);
+                        
+                        // Replace pristine content text node safely with highlighted layout spans
+                        while (tempSpanWrapper.firstChild) {
+                            element.insertBefore(tempSpanWrapper.firstChild, child);
+                        }
+                        element.removeChild(child);
+                    }
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    // Safe Guard: Do not search attributes inside code blocks or internal macros
+                    if (!child.classList.contains('search-highlight')) {
+                        walkAndHighlightNode(child);
+                    }
+                }
+            });
+        };
+        walkAndHighlightNode(container);
     });
 
     capturedHighlightNodes = Array.from(document.querySelectorAll('mark.search-highlight'));
@@ -224,7 +245,7 @@ function shiftHighlightTarget(indexDirectionDelta) {
     highlightActiveSelectionTarget(true);
 }
 
-// FIXED SEGMENT: Calculations compute container positions accurately to force explicit container scrolling
+// FIXED CRITICAL CONTAINER SCROLLING: Uses offset calculations for clean alignment
 function highlightActiveSelectionTarget(shouldApplyFocus) {
     const activeTargetNode = capturedHighlightNodes[activeHighlightIndex];
     if (!activeTargetNode) return;
@@ -236,22 +257,22 @@ function highlightActiveSelectionTarget(shouldApplyFocus) {
         activeTargetNode.classList.add('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.add('highlight-focus-ring');
 
-        // FIXED CHASSIS COORDS CALCULATION ROUTINE:
-        // Calculates explicit coordinate spaces relative to your custom viewport container layer
+        // FIXED CHASSIS JUMP SCROLL MATH:
+        // Anchors positioning based on offset distances within the scroll frame container bounds
         setTimeout(() => {
             if (parentCardEnvelope && scrollContainer) {
-                const containerTop = scrollContainer.getBoundingClientRect().top;
-                const cardTop = parentCardEnvelope.getBoundingClientRect().top;
+                // Calculate position offsets relative to the main scroll container
+                const targetCardTopOffset = parentCardEnvelope.offsetTop;
+                const centerAdjustmentOffset = (scrollContainer.clientHeight / 2) - (parentCardEnvelope.clientHeight / 2);
                 
-                // Track relative position and append current scroll height values
-                const absoluteTargetScrollTop = (cardTop - containerTop) + scrollContainer.scrollTop - (scrollContainer.clientHeight / 2) + (parentCardEnvelope.clientHeight / 2);
+                const finalCalculatedScrollPosition = targetCardTopOffset - centerAdjustmentOffset;
                 
                 scrollContainer.scrollTo({
-                    top: absoluteTargetScrollTop,
-                    behavior: 'smooth'
+                    top: finalCalculatedScrollPosition,
+                    behavior: 'auto' // Instant snapping
                 });
             }
-        }, 30);
+        }, 15);
     } else {
         activeTargetNode.classList.remove('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.remove('highlight-focus-ring');

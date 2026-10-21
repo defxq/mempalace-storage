@@ -164,3 +164,15 @@ header {
 mark.search-highlight { background: rgba(0, 240, 255, 0.2); color: #fff; border-bottom: 2px solid var(--glow-cyan); padding: 1px 0; }
 mark.search-highlight.current-focus-node { background: var(--glow-cyan) !important; color: #050608 !important; font-weight: 900; box-shadow: 0 0 12px var(--glow-cyan); border: none; }
 .glass-card.highlight-focus-ring { border-color: var(--glow-cyan) !important; box-shadow: 0 0 16px var(--glow-cyan-alpha); }
+/* 🧪 PRECISION NEW EXTRA VIEWPORT THEME OVERLAY: MATRIX REVOLUTION */
+body.theme-matrix {
+    --bg-void: #020402;
+    --surface: #060c06;
+    --border: #103a10;
+    --terminal-screen: #020402;
+    --text-bright: #99ff99;
+    --text-pure: #ffffff;
+    --text-muted: #1b4d1b;
+    --glow-cyan: #00ff33;
+    --glow-cyan-alpha: rgba(0, 255, 51, 0.12);
+}
