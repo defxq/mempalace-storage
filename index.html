@@ -3,220 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mempalace Vault Viewer</title>
-    <style>
-        /* Clean Industrial Developer Spec Color Palette Baseline */
-        :root { 
-            --bg: #0d1117;          
-            --surface: #161b22;     
-            --border: #30363d;      
-            --text-main: #c9d1d9;   
-            --text-link: #58a6ff;   
-            --accent-green: #34d399;
-            --accent-pink: #f43f5e; 
-            --code-bg: #010409;     
-            --amber-glow: #ff8800;
-        }
-
-        /* ✧ NOSTALGIC AMETHYST DEEP THEME VALUES OVERLAY ✧ */
-        body.theme-amethyst {
-            --bg: #0a0915;
-            --surface: #121026;
-            --border: #2b244d;
-            --text-main: #cbd5e1;
-            --text-link: #a78bfa;
-            --accent-green: #38bdf8;
-            --accent-pink: #ec4899;
-            --code-bg: #05040d;
-            --amber-glow: #f59e0b;
-        }
-        
-        body { 
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-            margin: 0; padding: 0; 
-            background: var(--bg);
-            color: var(--text-main); 
-            font-size: 17px; /* Default size locked to 17px */
-            height: 100vh;
-            height: 100dvh; 
-            display: flex;
-            flex-direction: column; 
-            overflow: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
-            transition: background 0.2s, color 0.2s;
-        }
-
-        header { 
-            background: var(--surface);
-            border-bottom: 1px solid var(--border); 
-            flex-shrink: 0; 
-            width: 100%;
-        }
-        .top-row { 
-            display: flex; flex-direction: column; gap: 10px; padding: 12px;
-        }
-        @media (min-width: 640px) {
-            .top-row { flex-direction: row; align-items: center; justify-content: space-between; padding: 12px 16px; }
-        }
-        .logo { font-weight: 700; color: #fff; letter-spacing: -0.2px; font-size: 13px; text-transform: uppercase; }
-        
-        .controls-wrapper { display: flex; align-items: center; gap: 6px; width: 100%; }
-        @media (min-width: 640px) { .controls-wrapper { width: auto; } }
-
-        .search-container {
-            position: relative; flex: 1; display: flex; align-items: center;
-            background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px;
-        }
-        @media (min-width: 640px) { .search-container { width: 340px; flex: none; } }
-        .search-container:focus-within { outline: 1px solid var(--text-link); }
-
-        #search { 
-            background: transparent; border: none; color: #fff; padding: 6px 12px; 
-            width: 100%; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box;
-        }
-        
-        .navigator-deck { display: none; align-items: center; gap: 2px; padding-right: 6px; flex-shrink: 0; }
-        .nav-stats { font-size: 10px; color: var(--accent-green); font-weight: bold; padding: 0 4px; white-space: nowrap; }
-        .nav-arrow-btn {
-            background: var(--surface); border: 1px solid var(--border); color: #fff;
-            font-size: 9px; width: 22px; height: 22px; display: flex; align-items: center;
-            justify-content: center; border-radius: 3px; cursor: pointer; transition: background 0.1s;
-        }
-        .nav-arrow-btn:active { background: var(--border); }
-
-        .menu-btn {
-            background: var(--code-bg); border: 1px solid var(--border); color: #fff;
-            padding: 6px 12px; border-radius: 4px; font-family: inherit; font-size: 12px;
-            cursor: pointer; font-weight: bold; flex-shrink: 0;
-        }
-        .menu-btn:active { background: var(--border); }
-        
-        .tab-bar { display: flex; gap: 4px; padding: 4px 12px; background: rgba(0,0,0,0.15); overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        @media (min-width: 640px) { .tab-bar { padding: 4px 16px; } }
-        .tab-btn { background: none; border: 1px solid transparent; padding: 5px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; color: #8b949e; font-family: inherit; }
-        .tab-btn.active { background: var(--bg); border-color: var(--border); color: #fff; font-weight: 600; }
-
-        .section-bar { display: flex; gap: 6px; padding: 4px 12px; background: rgba(0,0,0,0.05); overflow-x: auto; font-size: 11px; white-space: nowrap; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
-        @media (min-width: 640px) { .section-bar { padding: 4px 16px; } }
-        .section-link { color: #8b949e; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px solid transparent; }
-        .section-link.active { color: var(--accent-green); border-color: rgba(52, 211, 153, 0.2); background: rgba(52, 211, 153, 0.05); }
-
-        .container { 
-            flex: 1; padding: 12px; overflow-y: auto; box-sizing: border-box; 
-            scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-        }
-        @media (min-width: 640px) { .container { padding: 16px; } }
-        
-        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
-        @media (min-width: 768px) { .matrix-grid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 12px; } }
-        
-        .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; border-left: 1px solid var(--border); transition: border-color 0.2s, box-shadow 0.2s; }
-        .cmd-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .syntax-box { background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; border-left: 2px solid var(--text-link); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-
-        .flag-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
-        .flag-row { border-bottom: 1px solid var(--border); }
-        .flag-row:last-child { border-bottom: none; }
-        .flag-cell-name { width: 95px; font-weight: bold; color: var(--accent-green); padding: 5px 0; vertical-align: top; }
-        .flag-cell-desc { color: var(--text-main); padding: 5px 0; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
-        
-        .card-notes { font-size: 11px; color: #8b949e; border-top: 1px solid var(--border); padding-top: 8px; margin-top: auto; white-space: pre-wrap; }
-
-        .blog-wrapper { max-width: 800px; margin: 0 auto; display: none; padding-bottom: 30px; }
-        .blog-post { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: clamp(14px, 4vw, 24px); box-sizing: border-box; margin-bottom: 14px; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; border-left: 1px solid var(--border); transition: border-color 0.2s, box-shadow 0.2s; }
-        .blog-post h2 { font-size: 18px; color: #fff; margin: 0 0 12px 0; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-        .blog-post p { font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0 0 14px 0; white-space: pre-wrap; }
-        .blog-post code { background: var(--code-bg); color: var(--accent-pink); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border); }
-        
-        .code-block-wrapper { background: var(--code-bg); border: 1px solid var(--border); border-left: 2px solid var(--accent-green); padding: 10px; border-radius: 4px; margin: 12px 0; cursor: pointer; overflow-x: auto; }
-        .code-block-wrapper code { color: var(--accent-green); font-family: monospace; font-size: 12px; white-space: pre; border: none; background: none; padding: 0; }
-
-        .empty-notice { display: flex; align-items: center; justify-content: center; height: 200px; border: 1px dashed var(--border); border-radius: 6px; background: var(--surface); color: var(--text-main); font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
-
-        /* TOUCH-SAFE DRAWER SETUP */
-        .sidebar-drawer {
-            position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
-            background: var(--surface); border-left: 1px solid var(--border);
-            box-shadow: -4px 0 24px rgba(0,0,0,0.5); z-index: 999;
-            transition: right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;
-        }
-        .sidebar-drawer.open-pane { right: 0; }
-        
-        /* CLICKABLE BACKDROP LAYER CLICK MASK */
-        .sidebar-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
-            z-index: 990; display: none; transition: opacity 0.2s; opacity: 0;
-        }
-        .sidebar-overlay.open-pane { display: block; opacity: 1; }
-
-        .drawer-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
-        .drawer-title { font-size: 11px; font-weight: bold; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
-        
-        .close-x-btn { background: none; border: none; color: var(--accent-pink); font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
-        .close-x-btn:active { background: rgba(244,63,94,0.1); }
-
-        .config-row { display: flex; flex-direction: column; gap: 8px; }
-        .config-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .font-scaler-deck { display: flex; align-items: center; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-        .scaler-btn { flex: 1; background: none; border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: bold; padding: 10px 0; cursor: pointer; transition: background 0.15s; }
-        .scaler-btn:active { background: var(--border); }
-        .scaler-value-display { width: 60px; text-align: center; font-size: 12px; font-weight: bold; color: var(--accent-green); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-
-        .theme-select-deck { display: flex; flex-direction: column; gap: 6px; }
-        .theme-opt-btn {
-            background: var(--code-bg); border: 1px solid var(--border); color: #8b949e;
-            padding: 10px; border-radius: 4px; text-align: left; font-family: inherit;
-            font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.15s;
-        }
-        .theme-opt-btn.active-theme-token { border-color: var(--accent-green); color: var(--accent-green); background: rgba(52,211,153,0.03); }
-
-        mark.search-highlight { background: rgba(255, 136, 0, 0.25); color: #fff; border-bottom: 1px solid var(--amber-glow); padding: 1px 0; border-radius: 1px; }
-        mark.search-highlight.current-focus-node { background: var(--amber-glow); color: #000; font-weight: bold; box-shadow: 0 0 8px var(--amber-glow); }
-        .glass-card.highlight-focus-ring, .blog-post.highlight-focus-ring { border-color: var(--amber-glow) !important; box-shadow: 0 0 12px rgba(255, 136, 0, 0.15); }
-    </style>
+    <title>MEMPALACE VAULT VIEWER</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- TOUCH-SAFE OUTSIDE CLOSURE LAYER CLICK MASK -->
+    <!-- SETTINGS OVERSLIDE PANEL -->
     <div id="drawer-overlay" class="sidebar-overlay" onclick="toggleSidebarMenu(false)"></div>
-    
     <div id="settings-drawer" class="sidebar-drawer">
         <div class="drawer-header">
-            <div class="drawer-title">⚙️ CONFIGURATION PANEL</div>
+            <div class="drawer-title">⚙️ SYSTEM CONFIG</div>
             <button type="button" class="close-x-btn" onclick="toggleSidebarMenu(false)">✕ CLOSE</button>
         </div>
         
         <div class="config-row">
-            <div class="config-label">Workspace Font Scaling:</div>
+            <div class="config-label">Text Scale Config:</div>
             <div class="font-scaler-deck">
                 <button type="button" class="scaler-btn" onclick="modifyTextScale(-1)">-</button>
-                <div id="scaler-indicator" class="scaler-value-display">17px</div>
+                <div id="scaler-indicator" class="scaler-value-display">16px</div>
                 <button type="button" class="scaler-btn" onclick="modifyTextScale(1)">+</button>
             </div>
         </div>
 
         <div class="config-row">
-            <div class="config-label">Visual Interface Theme:</div>
+            <div class="config-label">Active Core Theme:</div>
             <div class="theme-select-deck">
                 <button type="button" id="theme-btn-industrial" class="theme-opt-btn active-theme-token" onclick="switchActiveThemeSheet('industrial')">
-                    ● INDUSTRIAL GITHUB DARK
+                    ● INDUSTRIAL CYAN TERMINAL
                 </button>
                 <button type="button" id="theme-btn-amethyst" class="theme-opt-btn" onclick="switchActiveThemeSheet('amethyst')">
-                    ○ MIDNIGHT AMETHYST DEEP
+                    ○ MIDNIGHT AMETHYST AXIS
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- MAIN INTERFACE HEADER -->
     <header>
         <div class="top-row">
-            <div class="logo">Mempalace Vault</div>
+            <div class="logo">⚡ MEMPALACE // CORE.VIEW</div>
             <div class="controls-wrapper">
                 <div class="search-container">
-                    <input type="text" id="search" placeholder="Search and track text... [/]" autocomplete="off">
+                    <input type="text" id="search" placeholder="Search indices... [/]" autocomplete="off">
                     <div id="search-nav" class="navigator-deck">
                         <span id="nav-count" class="nav-stats">0/0</span>
                         <button type="button" class="nav-arrow-btn" onclick="shiftHighlightTarget(-1)">▲</button>
@@ -230,9 +58,9 @@
         <div id="section-bar" class="section-bar"></div>
     </header>
 
+    <!-- CENTRAL WORKSPACE -->
     <main class="container" id="main-scroll-container">
         <div class="matrix-grid" id="card-grid"></div>
-        <div class="blog-wrapper" id="blog-view"></div>
     </main>
 
     <script src="app.js"></script>

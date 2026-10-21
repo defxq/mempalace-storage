@@ -2,20 +2,16 @@ let rawVaultData = [];
 let currentActiveTab = "";
 let currentActiveSection = "All";
 
-// SIDEBAR ACCESSIBILITY SCALING MANAGEMENT STATE
-let currentFontSizePixels = 17;
-const FONT_MIN_BOUNDS = 10;
+let currentFontSizePixels = 16;
+const FONT_MIN_BOUNDS = 11;
 const FONT_MAX_BOUNDS = 22;
 
-// TEXT HIGHLIGHT TRACKER TARGET STATE METRICS
 let capturedHighlightNodes = [];
 let activeHighlightIndex = -1;
 
-// FIXED MENU SLIDER DISPATCHER
 function toggleSidebarMenu(shouldOpen) {
     const drawer = document.getElementById('settings-drawer');
     const overlay = document.getElementById('drawer-overlay');
-    
     if (shouldOpen) {
         drawer.classList.add('open-pane');
         overlay.classList.add('open-pane');
@@ -25,7 +21,6 @@ function toggleSidebarMenu(shouldOpen) {
     }
 }
 
-// THEME SELECTION MATRIX ROUTINE
 function switchActiveThemeSheet(themeId) {
     const bodyNode = document.body;
     const btnIndustrial = document.getElementById('theme-btn-industrial');
@@ -35,15 +30,16 @@ function switchActiveThemeSheet(themeId) {
         bodyNode.classList.add('theme-amethyst');
         btnAmethyst.classList.add('active-theme-token');
         btnIndustrial.classList.remove('active-theme-token');
-        btnAmethyst.innerText = "● MIDNIGHT AMETHYST DEEP";
-        btnIndustrial.innerText = "○ INDUSTRIAL GITHUB DARK";
+        btnAmethyst.innerText = "● MIDNIGHT AMETHYST AXIS";
+        btnIndustrial.innerText = "○ INDUSTRIAL CYAN TERMINAL";
     } else {
         bodyNode.classList.remove('theme-amethyst');
         btnIndustrial.classList.add('active-theme-token');
         btnAmethyst.classList.remove('active-theme-token');
-        btnIndustrial.innerText = "● INDUSTRIAL GITHUB DARK";
-        btnAmethyst.innerText = "○ MIDNIGHT AMETHYST DEEP";
+        btnIndustrial.innerText = "● INDUSTRIAL CYAN TERMINAL";
+        btnAmethyst.innerText = "○ MIDNIGHT AMETHYST AXIS";
     }
+    executeLiveTextHighlighterScanner(); 
 }
 
 function modifyTextScale(pixelDelta) {
@@ -51,54 +47,36 @@ function modifyTextScale(pixelDelta) {
     if (nextSize < FONT_MIN_BOUNDS || nextSize > FONT_MAX_BOUNDS) return;
     
     currentFontSizePixels = nextSize;
-    
     document.getElementById('scaler-indicator').innerText = `${currentFontSizePixels}px`;
-    document.body.style.fontSize = `${currentFontSizePixels}px`;
     
-    const elementsToScale = document.querySelectorAll('.syntax-box, .flag-table, .continuous-markdown-body, .blog-post p, .flag-cell-name, .flag-cell-desc, .card-notes');
+    const elementsToScale = document.querySelectorAll('.card-title-header, .card-content-body, .vault-inline-code, .code-block-wrapper code');
     elementsToScale.forEach(block => {
-        block.style.fontSize = `${currentFontSizePixels - 1}px`;
+        block.style.fontSize = `${currentFontSizePixels}px`;
     });
 }
 
 async function bootRevisionEngine() {
     try {
         const response = await fetch(`./data.json?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Database file missing.");
+        if (!response.ok) throw new Error("File missing.");
         rawVaultData = await response.json();
         
         const cardGrid = document.getElementById('card-grid');
-        const blogView = document.getElementById('blog-view');
         const tabBar = document.getElementById('tab-bar');
         const sectionBar = document.getElementById('section-bar');
 
         if (!rawVaultData || rawVaultData.length === 0) {
-            tabBar.innerHTML = '';
-            sectionBar.innerHTML = '';
-            cardGrid.innerHTML = `
-                <div class="empty-notice" style="grid-column: 1 / -1; width: 100%;">
-                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
-                </div>
-            `;
-            blogView.innerHTML = `
-                <div class="empty-notice">
-                    [SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]
-                </div>
-            `;
-            blogView.style.display = 'block';
+            tabBar.innerHTML = ''; sectionBar.innerHTML = '';
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
             return;
         }
 
-        const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
-        
+        const extractedTabs = [...new Set(rawVaultData.map(item => item.tab).filter(Boolean))];
         if (extractedTabs.length === 0) {
-            tabBar.innerHTML = '';
-            sectionBar.innerHTML = '';
-            cardGrid.innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
+            cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
             return;
         }
 
-        // FIXED STRING TARGET RESOLUTION: Safe fallback selection checks string correctly
         if (!currentActiveTab || !extractedTabs.includes(currentActiveTab)) {
             currentActiveTab = String(extractedTabs[0]);
         }
@@ -108,12 +86,23 @@ async function bootRevisionEngine() {
         renderActiveDatabasePayload();
 
         document.getElementById('search').addEventListener('input', executeLiveTextHighlighterScanner);
+        
+        // FIXED GLOBAL SHORTCUT INTERCEPT: Completely captures the event phase to secure form focus
+        document.addEventListener('keydown', (e) => {
+            const searchInput = document.getElementById('search');
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                searchInput.focus();
+                searchInput.select();
+            }
+        }, true); // Setting 'true' forces execution ahead of native system defaults
 
     } catch (err) {
-        console.error("Vault fetching exception: ", err.message);
-        document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="grid-column:1/-1; width:100%;">[SYSTEM // STORAGE PRISTINE // NO LEDGER ENTRIES FOUND]</div>`;
+        document.getElementById('card-grid').innerHTML = `<div class="empty-notice" style="width:100%;">[SYSTEM DIRECTORY PREFETCH METRIC COLLISION INTERRUPT]</div>`;
     }
 }
+
 function renderTabBar(tabs) {
     const tabBar = document.getElementById('tab-bar');
     tabBar.innerHTML = tabs.map(tab => `
@@ -125,12 +114,11 @@ function renderTabBar(tabs) {
 
 function renderSectionBar() {
     const sectionBar = document.getElementById('section-bar');
-    const relatedItems = rawVaultData.filter(item => (item.tab || item.category) === currentActiveTab);
-    const uniqueSections = [...new Set(relatedItems.map(item => item.section))].filter(Boolean);
+    const relatedItems = rawVaultData.filter(item => item.tab === currentActiveTab);
+    const uniqueSections = [...new Set(relatedItems.map(item => item.section).filter(Boolean))];
 
     if (uniqueSections.length === 0) {
-        sectionBar.innerHTML = '';
-        return;
+        sectionBar.innerHTML = ''; return;
     }
 
     let sectionButtonsHTML = `<span class="section-link ${currentActiveSection === 'All' ? 'active' : ''}" onclick="switchSubSection('All')">ALL</span>`;
@@ -139,102 +127,49 @@ function renderSectionBar() {
             ${sec}
         </span>
     `).join('');
-
     sectionBar.innerHTML = sectionButtonsHTML;
 }
 
 function switchCategoryTab(targetTab) {
-    currentActiveTab = targetTab;
-    currentActiveSection = "All"; 
-    
-    document.getElementById('search').value = '';
-    document.getElementById('search-nav').style.display = 'none';
-    capturedHighlightNodes = [];
-    activeHighlightIndex = -1;
-
-    const extractedTabs = [...new Set(rawVaultData.map(item => item.tab || item.category))].filter(Boolean);
-    renderTabBar(extractedTabs);
-    renderSectionBar();
-    renderActiveDatabasePayload();
+    currentActiveTab = targetTab; currentActiveSection = "All";
+    resetSearchIndices();
+    const extractedTabs = [...new Set(rawVaultData.map(item => item.tab).filter(Boolean))];
+    renderTabBar(extractedTabs); renderSectionBar(); renderActiveDatabasePayload();
 }
 
 function switchSubSection(targetSection) {
     currentActiveSection = targetSection;
-    
+    resetSearchIndices();
+    renderSectionBar(); renderActiveDatabasePayload();
+}
+
+function resetSearchIndices() {
     document.getElementById('search').value = '';
     document.getElementById('search-nav').style.display = 'none';
-    capturedHighlightNodes = [];
-    activeHighlightIndex = -1;
-
-    renderSectionBar();
-    renderActiveDatabasePayload();
+    capturedHighlightNodes = []; activeHighlightIndex = -1;
 }
 
 function renderActiveDatabasePayload() {
     const cardGrid = document.getElementById('card-grid');
-    const blogView = document.getElementById('blog-view');
-
     const workspacePool = rawVaultData.filter(item => {
-        const matchesTab = (item.tab || item.category) === currentActiveTab;
-        const matchesSection = currentActiveSection === 'All' || item.section === currentActiveSection;
-        return matchesTab && matchesSection;
+        return item.tab === currentActiveTab && (currentActiveSection === 'All' || item.section === currentActiveSection);
     });
 
-    const representSample = rawVaultData.find(item => (item.tab || item.category) === currentActiveTab);
-    const isBlogTrack = representSample && (representSample.layoutMode === 'concept' || representSample.title);
-
-    if (isBlogTrack) {
-        cardGrid.style.display = 'none';
-        blogView.style.display = 'block';
-
-        if (workspacePool.length === 0) {
-            blogView.innerHTML = `<p style="color:var(--text-main); font-style:italic; padding:12px;">No documentation steps found.</p>`;
-            return;
-        }
-
-        blogView.innerHTML = workspacePool.map(item => `
-            <div class="blog-post">
-                <h2>${item.title || 'Untitled Segment Log'}</h2>
-                <p class="continuous-markdown-body">${item.content || ''}</p>
-            </div>
-        `).join('');
-
-    } else {
-        blogView.style.display = 'none';
-        cardGrid.style.display = 'grid';
-
-        if (workspacePool.length === 0) {
-            cardGrid.innerHTML = `<p style="grid-column: 1 / -1; color:var(--text-main); font-style:italic; padding:12px;">No CLI parameter matrices match parameters.</p>`;
-            return;
-        }
-
-        cardGrid.innerHTML = workspacePool.map(item => {
-            let cardHTML = `
-                <div class="glass-card">
-                    <div class="cmd-name">${item.command || 'Generic'}</div>
-                    <div class="syntax-box">${item.syntax || ''}</div>
-            `;
-
-            if (item.flags && item.flags.length > 0 && item.flags[0].flag !== "Default") {
-                cardHTML += `<table class="flag-table">`;
-                item.flags.forEach(f => {
-                    cardHTML += `
-                        <tr class="flag-row">
-                            <td class="flag-cell-name">${f.flag}</td>
-                            <td class="flag-cell-desc">${f.desc}</td>
-                        </tr>`;
-                });
-                cardHTML += `</table>`;
-            }
-
-            if (item.notes && item.notes.trim() !== "") {
-                cardHTML += `<div class="card-notes">↳ ${item.notes}</div>`;
-            }
-
-            cardHTML += `</div>`;
-            return cardHTML;
-        }).join('');
+    if (workspacePool.length === 0) {
+        cardGrid.innerHTML = `<div class="empty-notice" style="width:100%;">[NO VAULT OBJECT RECORDS DISCOVERED INSIDE TARGET MATRIX]</div>`;
+        return;
     }
+
+    cardGrid.innerHTML = workspacePool.map(item => `
+        <div class="glass-card" id="card-${item.id}">
+            <div class="card-meta-row">
+                <span class="card-section-tag">// ${item.section || 'GENERAL'}</span>
+                <span>NODE_${item.id.substring(0, 6)}</span>
+            </div>
+            <div class="card-title-header">${item.title || 'Untitled Segment Header'}</div>
+            <div class="card-content-body">${item.content || ''}</div>
+        </div>
+    `).join('');
     
     modifyTextScale(0);
 }
@@ -247,15 +182,14 @@ function executeLiveTextHighlighterScanner() {
 
     if (!query) {
         navDeck.style.display = 'none';
-        capturedHighlightNodes = [];
-        activeHighlightIndex = -1;
+        capturedHighlightNodes = []; activeHighlightIndex = -1;
         return;
     }
 
-    const targetTextNodes = document.querySelectorAll('.cmd-name, .syntax-box, .flag-cell-name, .flag-cell-desc, .card-notes, .blog-post h2, .continuous-markdown-body');
+    const targetTextNodes = document.querySelectorAll('.card-title-header, .card-content-body, .card-section-tag');
     
     targetTextNodes.forEach(node => {
-        const originalRawHTML = node.innerHTML;
+        let originalRawHTML = node.innerHTML;
         const safeQueryToken = query.replace(/[-\/\\^\$*+?.()|[\]{}]/g, '\\$&');
         const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
 
@@ -274,8 +208,7 @@ function executeLiveTextHighlighterScanner() {
         highlightActiveSelectionTarget(true);
     } else {
         navDeck.style.display = 'none';
-        capturedHighlightNodes = [];
-        activeHighlightIndex = -1;
+        capturedHighlightNodes = []; activeHighlightIndex = -1;
     }
 }
 
@@ -291,20 +224,34 @@ function shiftHighlightTarget(indexDirectionDelta) {
     highlightActiveSelectionTarget(true);
 }
 
+// FIXED SEGMENT: Calculations compute container positions accurately to force explicit container scrolling
 function highlightActiveSelectionTarget(shouldApplyFocus) {
     const activeTargetNode = capturedHighlightNodes[activeHighlightIndex];
     if (!activeTargetNode) return;
 
-    const parentCardEnvelope = activeTargetNode.closest('.glass-card, .blog-post');
+    const parentCardEnvelope = activeTargetNode.closest('.glass-card');
+    const scrollContainer = document.getElementById('main-scroll-container');
 
     if (shouldApplyFocus) {
         activeTargetNode.classList.add('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.add('highlight-focus-ring');
 
-        activeTargetNode.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
+        // FIXED CHASSIS COORDS CALCULATION ROUTINE:
+        // Calculates explicit coordinate spaces relative to your custom viewport container layer
+        setTimeout(() => {
+            if (parentCardEnvelope && scrollContainer) {
+                const containerTop = scrollContainer.getBoundingClientRect().top;
+                const cardTop = parentCardEnvelope.getBoundingClientRect().top;
+                
+                // Track relative position and append current scroll height values
+                const absoluteTargetScrollTop = (cardTop - containerTop) + scrollContainer.scrollTop - (scrollContainer.clientHeight / 2) + (parentCardEnvelope.clientHeight / 2);
+                
+                scrollContainer.scrollTo({
+                    top: absoluteTargetScrollTop,
+                    behavior: 'smooth'
+                });
+            }
+        }, 30);
     } else {
         activeTargetNode.classList.remove('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.remove('highlight-focus-ring');
