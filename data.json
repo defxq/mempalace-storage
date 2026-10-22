@@ -22,8 +22,8 @@
     "tab": "Git & Github",
     "section": "Starting git",
     "title": "Git installation & setup",
-    "content": "sudo apt update && sudo apt install git -y\r\n\r\n<span class='vault-inline-code'>git --version</span>\r\n\r\n# any nickname\r\ngit config --global user.name \"Your Name\"\r\n\r\n# (your github associated email)\r\ngit config --global user.email \"your.email@example.com\"\r\n\r\n# Set the default branch name to 'main' (highly recommended standard)\r\ngit config --global init.defaultBranch main\r\n\r\n# Verify your configuration:\r\ngit config --list\r\n===============================",
+    "content": "<span class='vault-inline-code'>sudo apt update && sudo apt install git -y</span>\r\n\r\n<span class='vault-inline-code'>git --version</span>\r\n\r\n# any nickname\r\n<span class='vault-inline-code'>git config --global user.name \"Your Name\"</span>\r\n\r\n# (your github associated email)\r\n<span class='vault-inline-code'>git config --global user.email \"your.email@example.com\"\r\n</span>\r\n# Set the default branch name to 'main' (highly recommended standard)\r\n<span class='vault-inline-code'>git config --global init.defaultBranch main</span>\r\n\r\n# Verify your configuration:\r\n<span class='vault-inline-code'>git config --list</span>\r\n===============================",
     "createdAt": "2026-10-22 12:31",
-    "updatedAt": "2026-10-22 12:31"
+    "updatedAt": "2026-10-22 12:34"
   }
 ]
