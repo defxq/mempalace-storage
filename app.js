@@ -2,9 +2,9 @@ let rawVaultData = [];
 let currentActiveTab = "";
 let currentActiveSection = "All";
 
-let currentFontSizePixels = 16;
-const FONT_MIN_BOUNDS = 11;
-const FONT_MAX_BOUNDS = 22;
+let currentFontSizePixels = 13;
+const FONT_MIN_BOUNDS = 7;
+const FONT_MAX_BOUNDS = 30;
 
 let capturedHighlightNodes = [];
 let activeHighlightIndex = -1;
