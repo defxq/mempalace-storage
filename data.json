@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "1792657865262",
+    "tab": "Linux",
+    "section": "Commands",
+    "title": "Basic Commands",
+    "content": "<div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>echo -e \"\\n hello\"</code></pre></div>\r\n<span class='vault-text-highlight'>-e</span> allows escape characters\r\n<div class=\"code-block-wrapper\" onclick=\"navigator.clipboard.writeText(this.querySelector('code').innerText); alert('Command snippet captured to clipboard!')\"><pre><code>stat [file|directory] </code></pre></div>\r\nShows stats, used to check hard link and Access, Modify, Change(AMC),  and blocks(blocks are multiples of 8, when size reaches over 4096 block, the block will show 16)\r\n\r\n",
+    "createdAt": "2026-10-22 08:31",
+    "updatedAt": "2026-10-22 08:31"
+  }
+]
