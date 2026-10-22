@@ -27,7 +27,6 @@ function switchActiveThemeSheet(themeId) {
     const btnAmethyst = document.getElementById('theme-btn-amethyst');
     const btnMatrix = document.getElementById('theme-btn-matrix');
 
-    // Wipe previous theme classes completely to protect core variables
     bodyNode.classList.remove('theme-amethyst', 'theme-matrix');
     btnIndustrial.classList.remove('active-theme-token');
     btnAmethyst.classList.remove('active-theme-token');
@@ -51,10 +50,8 @@ function switchActiveThemeSheet(themeId) {
         btnAmethyst.innerText = "○ MIDNIGHT AMETHYST AXIS";
         btnMatrix.innerText = "○ MATRIX REVOLUTION CODE";
     }
-    
-    executeLiveTextHighlighterScanner(); // Forces instant high-contrast selection updates
+    executeLiveTextHighlighterScanner(); 
 }
-
 
 function modifyTextScale(pixelDelta) {
     const nextSize = currentFontSizePixels + pixelDelta;
@@ -67,6 +64,26 @@ function modifyTextScale(pixelDelta) {
     elementsToScale.forEach(block => {
         block.style.fontSize = `${currentFontSizePixels}px`;
     });
+}
+
+function switchActiveFontFace(fontStyleId) {
+    const bodyNode = document.body;
+    const btnMono = document.getElementById('font-btn-mono');
+    const btnSans = document.getElementById('font-btn-sans');
+
+    if (fontStyleId === 'sans') {
+        bodyNode.classList.add('font-mode-sans');
+        btnSans.classList.add('active-theme-token');
+        btnMono.classList.remove('active-theme-token');
+        btnSans.innerText = "● CLEAN SYSTEM SANS";
+        btnMono.innerText = "○ TELETYPE FIXED MONO";
+    } else {
+        bodyNode.classList.remove('font-mode-sans');
+        btnMono.classList.add('active-theme-token');
+        btnSans.classList.remove('active-theme-token');
+        btnMono.innerText = "● TELETYPE FIXED MONO";
+        btnSans.innerText = "○ CLEAN SYSTEM SANS";
+    }
 }
 
 async function bootRevisionEngine() {
@@ -179,15 +196,27 @@ function renderActiveDatabasePayload() {
                 <span class="card-section-tag">// ${item.section || 'GENERAL'}</span>
                 <span>NODE_${item.id.substring(0, 6)}</span>
             </div>
-            <div class="card-title-header">${item.title || 'Untitled Segment Header'}</div>
-            <div class="card-content-body">${item.content || ''}</div>
+            <div class="card-title-header"></div>
+            <div class="card-content-body"></div>
+            
+            <div class="card-timestamp-footer">
+                <span>ADDED: ${item.createdAt || 'N/A'}</span>
+                <span>EDITED: ${item.updatedAt || 'N/A'}</span>
+            </div>
         </div>
     `).join('');
+
+    workspacePool.forEach(item => {
+        const cardElement = document.getElementById(`card-${item.id}`);
+        if (cardElement) {
+            cardElement.querySelector('.card-title-header').textContent = item.title || 'Untitled';
+            cardElement.querySelector('.card-content-body').innerHTML = item.content || '';
+        }
+    });
     
     modifyTextScale(0);
 }
 
-// FIXED: Advanced highlighter that uses node child loops to skip background HTML code blocks entirely
 function executeLiveTextHighlighterScanner() {
     const query = document.getElementById('search').value.trim().toLowerCase();
     const navDeck = document.getElementById('search-nav');
@@ -205,10 +234,12 @@ function executeLiveTextHighlighterScanner() {
     const searchRegex = new RegExp(`(${safeQueryToken})`, 'gi');
 
     targetContainers.forEach(container => {
-        // Recursive text-only parser skips hidden attributes and macros entirely
         const walkAndHighlightNode = (element) => {
-            let childNodesArray = Array.from(element.childNodes);
+            if (element.nodeName === 'CODE' || element.nodeName === 'PRE' || element.classList.contains('code-block-wrapper')) {
+                return;
+            }
             
+            let childNodesArray = Array.from(element.childNodes);
             childNodesArray.forEach(child => {
                 if (child.nodeType === Node.TEXT_NODE) {
                     const textValue = child.nodeValue;
@@ -216,14 +247,12 @@ function executeLiveTextHighlighterScanner() {
                         const tempSpanWrapper = document.createElement('span');
                         tempSpanWrapper.innerHTML = textValue.replace(searchRegex, `<mark class="search-highlight">$1</mark>`);
                         
-                        // Replace pristine content text node safely with highlighted layout spans
                         while (tempSpanWrapper.firstChild) {
                             element.insertBefore(tempSpanWrapper.firstChild, child);
                         }
                         element.removeChild(child);
                     }
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
-                    // Safe Guard: Do not search attributes inside code blocks or internal macros
                     if (!child.classList.contains('search-highlight')) {
                         walkAndHighlightNode(child);
                     }
@@ -259,31 +288,21 @@ function shiftHighlightTarget(indexDirectionDelta) {
     highlightActiveSelectionTarget(true);
 }
 
-// FIXED CRITICAL CONTAINER SCROLLING: Uses offset calculations for clean alignment
 function highlightActiveSelectionTarget(shouldApplyFocus) {
     const activeTargetNode = capturedHighlightNodes[activeHighlightIndex];
     if (!activeTargetNode) return;
 
     const parentCardEnvelope = activeTargetNode.closest('.glass-card');
-    const scrollContainer = document.getElementById('main-scroll-container');
 
     if (shouldApplyFocus) {
         activeTargetNode.classList.add('current-focus-node');
         if (parentCardEnvelope) parentCardEnvelope.classList.add('highlight-focus-ring');
 
-        // FIXED CHASSIS JUMP SCROLL MATH:
-        // Anchors positioning based on offset distances within the scroll frame container bounds
         setTimeout(() => {
-            if (parentCardEnvelope && scrollContainer) {
-                // Calculate position offsets relative to the main scroll container
-                const targetCardTopOffset = parentCardEnvelope.offsetTop;
-                const centerAdjustmentOffset = (scrollContainer.clientHeight / 2) - (parentCardEnvelope.clientHeight / 2);
-                
-                const finalCalculatedScrollPosition = targetCardTopOffset - centerAdjustmentOffset;
-                
-                scrollContainer.scrollTo({
-                    top: finalCalculatedScrollPosition,
-                    behavior: 'auto' // Instant snapping
+            if (activeTargetNode) {
+                activeTargetNode.scrollIntoView({
+                    block: 'center',
+                    behavior: 'auto'
                 });
             }
         }, 15);

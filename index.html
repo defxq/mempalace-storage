@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MEMPALACE VAULT VIEWER</title>
+    <title>Guide 303</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -25,8 +25,21 @@
             </div>
         </div>
 
-                <div class="config-row">
-            <div class="config-label">Active Core Theme:</div>
+                 <!-- ADDED: FONT FAMILY TOGGLER BLOCK -->
+        <div class="config-row">
+            <div class="config-label">System Font Face:</div>
+            <div class="theme-select-deck">
+                <button type="button" id="font-btn-mono" class="theme-opt-btn active-theme-token" onclick="switchActiveFontFace('mono')">
+                    ● TELETYPE FIXED MONO
+                </button>
+                <button type="button" id="font-btn-sans" class="theme-opt-btn" onclick="switchActiveFontFace('sans')">
+                    ○ CLEAN SYSTEM SANS
+                </button>
+            </div>
+        </div>
+
+        <div class="config-row">
+            <div class="config-label">Visual Interface Theme:</div>
             <div class="theme-select-deck">
                 <button type="button" id="theme-btn-industrial" class="theme-opt-btn active-theme-token" onclick="switchActiveThemeSheet('industrial')">
                     ● INDUSTRIAL CYAN TERMINAL
@@ -34,19 +47,26 @@
                 <button type="button" id="theme-btn-amethyst" class="theme-opt-btn" onclick="switchActiveThemeSheet('amethyst')">
                     ○ MIDNIGHT AMETHYST AXIS
                 </button>
-                <!-- NEW THEME CONFIGURATION TRIGGER BUTTON LINK -->
                 <button type="button" id="theme-btn-matrix" class="theme-opt-btn" onclick="switchActiveThemeSheet('matrix')">
                     ○ MATRIX REVOLUTION CODE
                 </button>
             </div>
         </div>
 
+        <!-- ADDED: EXTERNAL HUB CONTACT REDIRECT BUTTON -->
+        <div class="config-row" style="margin-top: auto; padding-top: 10px; border-top: 2px solid var(--border);">
+            <a href="https://your-custom-contact-url.com" target="_blank" rel="noopener noreferrer" class="theme-opt-btn" style="text-decoration:none; text-align:center; display:block; border-color:var(--retro-alert); color:var(--retro-alert); background:rgba(255,51,102,0.02);">
+                🛠️ CONTACT SUPPORT
+            </a>
+        </div>
+
+
     </div>
 
     <!-- MAIN INTERFACE HEADER -->
     <header>
         <div class="top-row">
-            <div class="logo">⚡ MEMPALACE // CORE.VIEW</div>
+            <div class="logo">Power Runner's guide</div>
             <div class="controls-wrapper">
                 <div class="search-container">
                     <input type="text" id="search" placeholder="Search indices... [/]" autocomplete="off">

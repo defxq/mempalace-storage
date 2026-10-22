@@ -1,3 +1,13 @@
+/* --- SANS-SERIF ALTERNATIVE AXIS OVERRIDE --- */
+body.font-mode-sans {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+body.font-mode-sans .syntax-box, 
+body.font-mode-sans .code-block-wrapper code, 
+body.font-mode-sans .vault-inline-code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace !important;
+}
+
 /* 🧪 PRECISION NEW EXTRA VIEWPORT THEME OVERLAY: MATRIX REVOLUTION */
 body.theme-matrix {
     --bg-void: #020402;
@@ -133,8 +143,46 @@ header {
 .vault-text-bold { color: #fff; font-weight: 900; }
 .vault-text-highlight { background: rgba(0, 240, 255, 0.15); border-bottom: 2px solid var(--glow-cyan); color: #fff; padding: 0 2px; }
 
-.code-block-wrapper { background: var(--terminal-screen); border: 2px solid var(--border); border-left: 4px solid var(--glow-cyan); padding: 12px; border-radius: 4px; margin: 10px 0; cursor: pointer; overflow-x: auto; }
-.code-block-wrapper code { color: var(--glow-cyan); font-family: inherit; font-size: 11px; white-space: pre; border: none; background: none; padding: 0; }
+/* RE-ENGINEERED LOW-PROFILE SPACING BLOCKS */
+/* RE-POWERED SOLID ACCENT CORE CONTAINER */
+.code-block-wrapper { 
+    background: var(--terminal-screen); 
+    border: 2px solid var(--border); 
+    
+    /* RECTIFIED: Restored your sharp solid 4px neon line on the left edge */
+    border-left: 4px solid var(--glow-cyan); 
+    
+    /* Kept your optimized low-profile spacing setup */
+    padding: 0 12px; 
+    border-radius: 4px; 
+    margin: 3px 0; 
+    
+    cursor: pointer; 
+    overflow-x: auto; 
+}
+
+.code-block-wrapper code { 
+    color: var(--glow-cyan); 
+    font-family: inherit; 
+    font-size: 11px; 
+    white-space: pre; 
+    border: none; 
+    background: none; 
+    padding: 0; 
+}
+
+/* NEW REVISION TIMESTAMP LABELS styling rules */
+.card-timestamp-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9px;
+    font-weight: 900;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--border);
+    padding-top: 6px;
+    margin-top: auto;
+}
 
 .empty-notice { display: flex; align-items: center; justify-content: center; height: 160px; border: 2px dashed var(--border); border-radius: 6px; background: var(--surface); color: var(--text-muted); font-size: 11px; font-weight: 900; letter-spacing: 2px; }
 
@@ -172,7 +220,8 @@ header {
 }
 .theme-opt-btn.active-theme-token { border-color: var(--glow-cyan); color: var(--glow-cyan); background: var(--glow-cyan-alpha); }
 
-/* PRECISION HIGH-CONTRAST SELECTION SCROLL FOCUS HIGHLIGHTS */
+
+/* HIGH-CONTRAST SELECTION SCROLL FOCUS HIGHLIGHTS */
 mark.search-highlight { background: rgba(0, 240, 255, 0.2); color: #fff; border-bottom: 2px solid var(--glow-cyan); padding: 1px 0; }
 mark.search-highlight.current-focus-node { background: var(--glow-cyan) !important; color: #050608 !important; font-weight: 900; box-shadow: 0 0 12px var(--glow-cyan); border: none; }
 .glass-card.highlight-focus-ring { border-color: var(--glow-cyan) !important; box-shadow: 0 0 16px var(--glow-cyan-alpha); }
